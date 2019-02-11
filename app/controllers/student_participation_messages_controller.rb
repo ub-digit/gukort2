@@ -1,0 +1,2 @@
+class StudentParticipationMessagesController < ApplicationController
+end
