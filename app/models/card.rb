@@ -16,7 +16,8 @@ class Card
     @printstamp = Time.parse(data["Utskrivet"])
     @expire = data["Giltighetsdatum"]
     @cardid = data["MifareID"]
-    # Nummerserie 1-3 ?!?
+    @cardnumber = data["Nummerserie3"]
+    # Nummerserie 1-2 ?!?
     @pin = data["PIN"]
     @status = data["Status"]
   end
@@ -24,6 +25,7 @@ class Card
   def as_json(opt = {})
     {
       pnr: @pnr,
+      cardnumber: @cardnumber,
       userid: @userid,
       printstamp: @printstamp,
       expire: @expire,
