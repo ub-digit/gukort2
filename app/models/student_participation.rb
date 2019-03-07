@@ -8,6 +8,10 @@ class StudentParticipation
     end
 
     parse(data["LadokParticipation"])
+    # Send parsed data to Patron class, for temporary storage.
+    # If this completes the required data, the Patron class will
+    # write to ILS
+    Patron.store_student_participation(self.as_json)
   end
 
   def as_json(opt = {})

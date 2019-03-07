@@ -7,6 +7,10 @@ class Student
       raise StandardError, "Student message does not contain key: personRecord"
     end
     parse(data["personRecord"]["person"])
+    # Send parsed data to Patron class, for temporary storage.
+    # If this completes the required data, the Patron class will
+    # write to ILS
+    Patron.store_student(self.as_json)
   end
 
   def as_json(opt = {})
