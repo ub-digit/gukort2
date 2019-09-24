@@ -1,8 +1,17 @@
+require "pp"
+
 class Student
   include StudentParsingComponents
+  include FormatTransformation
 
   def initialize(data)
+    #puts "====== HELLLOOWWW!!! ========"
+    #puts "THE DATA: #{data}"
+    puts "\n====================\n\n"
+
     @raw = data
+    #data = xml_to_hash(data)
+
     if !data["personRecord"]
       raise StandardError, "Student message does not contain key: personRecord"
     end
@@ -19,10 +28,10 @@ class Student
       address1: @addr1,
       address2: @addr2,
       contact: @contact,
-      extra: @extra
+      extra: @extra,
     }
   end
-  
+
   def parse(data)
     @name = parse_name(data["name"])
     @addr1 = parse_address(data["address"], "POSTADRESS")
@@ -45,19 +54,19 @@ class Student
       account: account,
       account_email: account_email,
       account2: account2,
-      account_email2: account_email2
+      account_email2: account_email2,
     }
   end
-  
+
   def parse_contact(contactdata)
     phone = get_contact(contactdata, "TelephonePrimary")
     email = get_contact(contactdata, "EmailPrimary")
     {
       phone: phone,
-      email: email
+      email: email,
     }
   end
-  
+
   def parse_address(addressdata, addr_type)
     care_of = get_address(addressdata, addr_type, "CareOf")
     street = get_address(addressdata, addr_type, "NonfieldedStreetAddress1")
@@ -69,16 +78,16 @@ class Student
       street: street,
       zip: zip,
       city: city,
-      country: country
+      country: country,
     }
   end
-  
+
   def parse_name(namedata)
     firstname = get_name(namedata, "FullName", "First")
     surname = get_name(namedata, "FullName", "Surname")
     {
       firstname: firstname,
-      surname: surname
+      surname: surname,
     }
   end
 
@@ -86,7 +95,7 @@ class Student
     # Need to put namedata in array to reuse get_instance_of_type()
     get_instance_of_type([namedata], "nameType", "partName", instance_type, instance_name)
   end
-  
+
   def get_address(addressdata, instance_type, instance_name)
     get_instance_of_type(addressdata, "addressType", "addressPart", instance_type, instance_name)
   end
@@ -98,5 +107,4 @@ class Student
   def get_extension(extensiondata, field_name)
     get_field(extensiondata["extensionField"], field_name)
   end
-  
 end

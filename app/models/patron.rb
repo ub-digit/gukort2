@@ -7,10 +7,31 @@ class Patron < ApplicationRecord
   #      extra: @extra
   #    }
 
+  def self.get_basic_data(personalnumber)
+    basic_data = { personalnumber: personalnumber }
+    config = get_config
+    params = { userid: config[:user], password: config[:password], personalnumber: personalnumber }.to_query
+    url = "#{config[:base_url]}/members/check?#{params}"
+    response = RestClient.get(url)
+
+    if (response && response.code == 200)
+      xml = Nokogiri::XML(response.body).remove_namespaces!
+
+      if (xml.search("//response/borrowernumber").text.present?)
+        basic_data.merge!(borrowernumber: xml.search("//response/borrowernumber"))
+      end
+      if (xml.search("//response/uniq").text.present?)
+        basic_data.merge!(uniq: xml.search("//response/uniq"))
+      end
+    end
+
+    return basic_data
+  end
+
   def self.store_student(data)
     source_pnr = data[:extra][:pnr]
     pnr12 = get_pnr12(source_pnr)
-    
+
     record = get_record(pnr12)
     record.update_attributes(from_student_data(pnr12, data))
   end
@@ -30,10 +51,10 @@ class Patron < ApplicationRecord
   # for merge with existing record.
   def self.from_participation_data(data)
     {
-      categorycode: map_categorycode(data)
+      categorycode: map_categorycode(data),
     }.compact
   end
-  
+
   # Rewrite student_data in patron form to merge with existing record.
   # Therefor the hash is compacted first to get rid of nils
   def self.from_student_data(pnr12, data)
@@ -78,13 +99,13 @@ class Patron < ApplicationRecord
     end
     output.compact
   end
-  
+
   # If there is a patron record already, fetch it and add to it,
   # otherwise return a new record
   def self.get_record(pnr12)
     Patron.where(pnr12: pnr12).first || Patron.new
   end
-  
+
   # TODO: Actual parsing
   def self.map_categorycode(course_data)
     "SH"
@@ -108,7 +129,7 @@ class Patron < ApplicationRecord
     return nil if pnr12.blank?
     pnr12[2...12]
   end
-  
+
   # Reference:
   #  t.text :firstname
   #  t.text :surname
