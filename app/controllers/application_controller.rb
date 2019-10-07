@@ -10,7 +10,7 @@ class ApplicationController < ActionController::API
   end
 
   def store_xml(data, file_prefix)
-    File.open("#{file_prefix}-#{Time.now.utc.strftime("%F_%H%M%S_%9N")}.xml", "w") do |file|
+    File.open("output/#{file_prefix}-#{Time.now.utc.strftime("%F_%H%M%S_%9N")}.xml", "w") do |file|
       file << data
     end
   end

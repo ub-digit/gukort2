@@ -18,10 +18,10 @@ class Patron < ApplicationRecord
       xml = Nokogiri::XML(response.body).remove_namespaces!
 
       if (xml.search("//response/borrowernumber").text.present?)
-        basic_data.merge!(borrowernumber: xml.search("//response/borrowernumber"))
+        basic_data.merge!(borrowernumber: xml.search("//response/borrowernumber").text)
       end
       if (xml.search("//response/uniq").text.present?)
-        basic_data.merge!(uniq: xml.search("//response/uniq"))
+        basic_data.merge!(uniq: xml.search("//response/uniq").text)
       end
     end
 

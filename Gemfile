@@ -47,3 +47,6 @@ gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
 
 # XML parameters may only be used with the actionpack-xml_parser gem
 gem 'actionpack-xml_parser'
+
+# Use it to communicate with Koha and the MQ-adapter
+gem "rest-client"

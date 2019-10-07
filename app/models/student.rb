@@ -4,6 +4,8 @@ class Student
   include StudentParsingComponents
   include FormatTransformation
 
+  attr_reader :extra
+
   def initialize(data)
     #puts "====== HELLLOOWWW!!! ========"
     #puts "THE DATA: #{data}"
