@@ -7,7 +7,15 @@ class Card
       raise StandardError, "Card message does not contain key: Kort"
     end
     parse(data["Kort"])
-  end
+    log(@status)
+
+    case @status
+      when "Active"
+        
+      when "Locked"
+        
+
+    end
 
   def parse(data)
     owner = data["Kortinnehavare"]
@@ -33,5 +41,9 @@ class Card
       pin: @pin,
       status: @status
     }
+  end
+
+  def log(msg)
+     puts "\033[32m\033[1m#{msg}\e[0m"
   end
 end

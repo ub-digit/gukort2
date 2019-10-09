@@ -10,10 +10,21 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20190307090043) do
+ActiveRecord::Schema.define(version: 20191009094828) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "blacklisted_card_numbers", force: :cascade do |t|
+    t.string "card_number", null: false
+  end
+
+  create_table "messages", force: :cascade do |t|
+    t.text "xml"
+    t.string "queue_name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
 
   create_table "patrons", force: :cascade do |t|
     t.text "firstname"
