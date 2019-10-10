@@ -1,0 +1,9 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  pnr: MyString
+  expiration_date: 2019-10-10
+
+two:
+  pnr: MyString
+  expiration_date: 2019-10-10

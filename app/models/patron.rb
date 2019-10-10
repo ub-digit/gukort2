@@ -24,8 +24,15 @@ class Patron < ApplicationRecord
         basic_data.merge!(uniq: xml.search("//response/uniq").text)
       end
     end
-
     return basic_data
+  end
+
+  def self.block(borrowernumber)
+    config = get_config
+    params = { userid: config[:user], password: config[:password], action: "cardinvalid", borrowernumber: borrowernumber }.to_query
+    url = "#{config[:base_url]}/members/update?#{params}"
+    response = RestClient.get(url)
+    return response
   end
 
   def self.store_student(data)
