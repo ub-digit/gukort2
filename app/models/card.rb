@@ -17,6 +17,7 @@ class Card
 
     case @status
       when "Active"
+        log("handle active in case")
         handle_active()
       when "Locked"
         blacklist_card()
@@ -29,11 +30,28 @@ class Card
   def block_patron
     log("Block patron")
     basic_data = Patron.get_basic_data(@pnr)
-    Patron.block(basic_data[:borrowernumber]) if basic_data[:uniq] == "true"
+    #Set debardment if user exists in Koha
+    Patron.block(basic_data[:borrowernumber]) if basic_data[:borrowernumber]
   end
 
   def handle_active
-
+    log("handle active")
+    basic_data = Patron.get_basic_data(@pnr)
+    #Does user exist in Koha?
+    if basic_data[:borrowernumber]
+      log("User exists in Koha")
+      #uppdatera giltighetsdatatum i gukort2-log
+       state_record = IssuedState.where(pnr: @pnr).first
+      if state_record
+        state_record.update(expiration_date: Date.parse(@expire))
+        Patron.update(basic_data[:borrowernumber], @cardnumber, @userid, @expire, @pin)
+      end
+    else
+      log("User does NOT exist in Koha")
+      # Det finns ingen sådan användare i Koha, uppdatera error log med eventuella fel
+      
+    end
+    log(basic_data.to_s)
   end
 
   def blacklist_card 
@@ -53,6 +71,9 @@ class Card
     issued_states.each do |issued_state|
       issued_state.destroy
     end
+  end
+
+  def add_to_issued_state
   end
 
   def parse(data)
