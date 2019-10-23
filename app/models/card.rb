@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 class Card
   include ColorLog
   attr_reader :pnr, :userid, :printstamp, :expire, :cardid, :pin, :status
@@ -18,13 +19,13 @@ class Card
     end
 
     case @status
-      when "Active"
-        log("handle active in case")
-        handle_active()
-      when "Locked"
-        blacklist_card()
-        delete_from_issued_state()
-        block_patron()
+    when "Active"
+      log("handle active in case")
+      handle_active()
+    when "Locked"
+      blacklist_card()
+      delete_from_issued_state()
+      block_patron()
     end
   end
 
@@ -43,7 +44,7 @@ class Card
     if basic_data[:borrowernumber]
       log("User exists in Koha")
       #uppdatera giltighetsdatatum i gukort2-log
-       state_record = IssuedState.where(pnr: @pnr).first
+      state_record = IssuedState.where(pnr: @pnr).first
       if state_record
         state_record.update(expiration_date: Date.parse(@expire))
         Koha.update(basic_data[:borrowernumber], @cardnumber, @userid, @expire, @pin)
