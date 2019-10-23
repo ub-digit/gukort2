@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20191018121942) do
+ActiveRecord::Schema.define(version: 20191023115550) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -24,6 +24,7 @@ ActiveRecord::Schema.define(version: 20191018121942) do
     t.date "expiration_date"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["pnr"], name: "index_issued_states_on_pnr", unique: true
   end
 
   create_table "messages", force: :cascade do |t|
