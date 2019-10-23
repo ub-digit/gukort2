@@ -3,9 +3,9 @@ class Card
   include ColorLog
   attr_reader :pnr, :userid, :printstamp, :expire, :cardid, :pin, :status
   
-  def initialize(data, msgid)
+  def initialize(data, msg)
     @raw = data
-    @msgid = msgid
+    @msg = msg
     if !data["Kort"]
       raise StandardError, "Card message does not contain key: Kort"
     end
