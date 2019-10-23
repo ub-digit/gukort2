@@ -11,7 +11,7 @@ def get_config
     user: APP_CONFIG["koha"]["user"],
     password: APP_CONFIG["koha"]["password"],
     svc_check: APP_CONFIG["koha"]["svc_check"],
-    svc_update: APP_CONFIG["koha"]["svc_create"],
+    svc_create: APP_CONFIG["koha"]["svc_create"],
     svc_update: APP_CONFIG["koha"]["svc_update"],
   }
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20191010093647) do
+ActiveRecord::Schema.define(version: 20191018121942) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -31,6 +31,7 @@ ActiveRecord::Schema.define(version: 20191010093647) do
     t.string "queue_name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text "response"
   end
 
   create_table "patrons", force: :cascade do |t|

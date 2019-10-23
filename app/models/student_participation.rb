@@ -15,7 +15,7 @@ class StudentParticipation
     pp "EXTRA EXTRA READ ALL ABOUT IT"
     pnr = my_student.extra[:pnr]
     pp pnr
-    bdata = Patron.get_basic_data(pnr)
+    bdata = Koha.get_basic_data(pnr)
     pp bdata[:uniq]
     pp bdata[:borrowernumber]
     pp bdata[:category_code]

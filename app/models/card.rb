@@ -1,8 +1,10 @@
 class Card
+  include ColorLog
   attr_reader :pnr, :userid, :printstamp, :expire, :cardid, :pin, :status
   
-  def initialize(data)
+  def initialize(data, msgid)
     @raw = data
+    @msgid = msgid
     if !data["Kort"]
       raise StandardError, "Card message does not contain key: Kort"
     end
@@ -29,14 +31,15 @@ class Card
 
   def block_patron
     log("Block patron")
-    basic_data = Patron.get_basic_data(@pnr)
+    basic_data = Koha.get_basic_data(@pnr)
     #Set debardment if user exists in Koha
-    Patron.block(basic_data[:borrowernumber]) if basic_data[:borrowernumber]
+    res = Koha.block(basic_data[:borrowernumber]) if basic_data[:borrowernumber]
+    log(res)
   end
 
   def handle_active
     log("handle active")
-    basic_data = Patron.get_basic_data(@pnr)
+    basic_data = Koha.get_basic_data(@pnr)
     #Does user exist in Koha?
     if basic_data[:borrowernumber]
       log("User exists in Koha")
@@ -44,7 +47,7 @@ class Card
        state_record = IssuedState.where(pnr: @pnr).first
       if state_record
         state_record.update(expiration_date: Date.parse(@expire))
-        Patron.update(basic_data[:borrowernumber], @cardnumber, @userid, @expire, @pin)
+        Koha.update(basic_data[:borrowernumber], @cardnumber, @userid, @expire, @pin)
       end
     else
       log("User does NOT exist in Koha")
@@ -102,7 +105,5 @@ class Card
     }
   end
 
-  def log(msg)
-     puts "\033[32m\033[1m#{msg}\e[0m"
-  end
+  
 end
