@@ -19,11 +19,11 @@ class Koha
       end
 
       if (xml.search("//response/expirationdate").text.present?)
-        basic_data.merge!(uniq: xml.search("//response/expirationdate").text)
+        basic_data.merge!(expirationdate: xml.search("//response/expirationdate").text)
       end
 
        if (xml.search("//response/categorycode").text.present?)
-        basic_data.merge!(uniq: xml.search("//response/categorycode").text)
+        basic_data.merge!(categorycode: xml.search("//response/categorycode").text)
       end
 
     end
@@ -41,7 +41,6 @@ class Koha
     config = get_config
     params = { userid: config[:user], password: config[:password], action: "update", borrowernumber: borrowernumber, cardnumber: cardnumber, patronuserid: userid, dateexpiry: expiration_date, pin: pin_number}.to_query
     url = "#{config[:base_url]}/members/update?#{params}"
-    response = RestClient.get(url)
-    return response
+    RestClient.get(url)
   end
 end

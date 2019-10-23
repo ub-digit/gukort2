@@ -25,14 +25,13 @@ class Card
         blacklist_card()
         delete_from_issued_state()
         block_patron()
-        # Sätt GU-spärr i Koha ->
     end
   end
 
   def block_patron
     log("Block patron")
     basic_data = Koha.get_basic_data(@pnr)
-    #Set debardment if user exists in Koha
+    #Set debarment if user exists in Koha
     res = Koha.block(basic_data[:borrowernumber]) if basic_data[:borrowernumber]
     log(res)
   end
@@ -54,12 +53,11 @@ class Card
       # Det finns ingen sådan användare i Koha, uppdatera error log med eventuella fel
       
     end
-    log(basic_data.to_s)
   end
 
   def blacklist_card 
     log('blacklisting card')
-      BlacklistedCardNumber.create(card_number:  @cardnumber)
+    BlacklistedCardNumber.create(card_number:  @cardnumber)
   end
 
   def blacklisted?
@@ -70,10 +68,7 @@ class Card
 
   def delete_from_issued_state
     log('delete user')
-    issued_states = IssuedState.where(pnr: @pnr)
-    issued_states.each do |issued_state|
-      issued_state.destroy
-    end
+    IssuedState.where(pnr: @pnr).first.destroy
   end
 
   def add_to_issued_state
