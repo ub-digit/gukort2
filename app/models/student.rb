@@ -6,24 +6,73 @@ class Student
 
   attr_reader :extra
 
-  def initialize(data)
-    #puts "====== HELLLOOWWW!!! ========"
-    #puts "THE DATA: #{data}"
-    puts "\n====================\n\n"
-
+  def initialize(data, msg)
     @raw = data
-    #data = xml_to_hash(data)
-
+    @msg = msg
     if !data["personRecord"]
       raise StandardError, "Student message does not contain key: personRecord"
     end
     parse(data["personRecord"]["person"])
-    # Send parsed data to Patron class, for temporary storage.
-    # If this completes the required data, the Patron class will
-    # write to ILS
-    Patron.store_student(self.as_json)
   end
 
+  def process_student
+    handle_student
+  end
+
+  def handle_student
+    log("handle active")
+    basic_data = Koha.get_basic_data(@pnr)
+    #Does user exist in Koha?
+    if basic_data[:borrowernumber]
+      # Is user a student according to Koha
+      if is_student?(basic_data[:categorycode])
+        handle_pnr(basic_data)
+        Koha.update({
+          borrowernumber: basic_data[:borrowernumber],
+          patronuserid: @extra[:account],
+          new_pnr: @new_pnr,
+          # TODO: addresses
+          firstname: @name[:firstname],
+          surname: @name[:surname],
+          phone: @contact[:phone],
+          email: @contact[:email]
+        })
+      end
+    end
+  end
+
+  def handle_pnr(basic_data)
+    @new_pnr = nil
+    # Is there a new pnr and person is not employed at GU
+    if @extra[:pnr_new] && !basic_data[:expirationdate]
+      @new_pnr = @extra[:pnr_new]
+
+      issued_state = IssuedState.where(pnr: @pnr).first
+      issued_state_new_pnr = IssuedState.where(pnr: @new_pnr).first
+
+      if !issued_state && !issued_state_new_pnr
+        return
+      end
+
+      # There are possibly two lines, one for each pnr. Take the
+      # latest date and use that in the new line, remove both the
+      # original ones.
+      expiration_dates = []
+      if issued_state
+        expiration_dates << issued_state[:expiration_date]
+        issued_state.destroy
+      end
+
+      if issued_state_new_pnr
+        expiration_dates << issued_state_new_pnr[:expiration_date]
+        issued_state_new_pnr.destroy
+      end
+
+      max_date = expiration_dates.sort.first
+      IssuedState.create(pnr: @new_pnr, expiration_date: max_date)
+    end
+  end
+  
   def as_json(opt = {})
     {
       name: @name,
@@ -40,10 +89,18 @@ class Student
     @addr2 = parse_address(data["address"], "FOLKBOKFORINGSADRESS")
     @contact = parse_contact(data["contactinfo"])
     @extra = parse_extension(data["extension"])
+    # For consistency with other queue data parsers
+    @pnr = @extra[:pnr]
   end
 
   def parse_extension(extensiondata)
     pnr = get_extension(extensiondata, "PersonIdentityNumber")
+    pnr_old = get_extension(extensiondata, "PersonIdentityNumberOld")
+    if pnr_old
+      pnr_new = pnr
+      pnr = pnr_old
+    end
+    
     account = get_extension(extensiondata, "StudentAccountName")
     account_email = get_extension(extensiondata, "StudentAccountEmail")
 
@@ -53,6 +110,7 @@ class Student
     # Also DeceasedFlag and ProtectedIdentifyFlag which will be ignored
     {
       pnr: pnr,
+      pnr_new: pnr_new,
       account: account,
       account_email: account_email,
       account2: account2,

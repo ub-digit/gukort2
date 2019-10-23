@@ -1,4 +1,9 @@
 module StudentParsingComponents
+  def is_student?(categorycode)
+    return true if ["SH","SE","SS","SP","SM","SA","SK","SY"].include?(categorycode)
+    return false
+  end
+  
   def get_value_of_type(data, type_key, value_key, instance_type)
     data.each do |item|
       # Need to put item[type_key] in array to reuse get_instance()
