@@ -47,7 +47,12 @@ class Card
       state_record = IssuedState.where(pnr: @pnr).first
       if state_record
         state_record.update(expiration_date: Date.parse(@expire))
-        Koha.update(basic_data[:borrowernumber], @cardnumber, @userid, @expire, @pin)
+        Koha.update({
+          borrowernumber: basic_data[:borrowernumber],
+          cardnumber: @cardnumber,
+          patronuserid: @userid,
+          dateexpiry: @expire,
+          pin: @pin})
       end
     else
       log("User does NOT exist in Koha")

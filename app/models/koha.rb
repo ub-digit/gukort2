@@ -32,15 +32,16 @@ class Koha
 
   def self.block(borrowernumber)
     config = get_config
-    params = { userid: config[:user], password: config[:password], action: "cardinvalid", borrowernumber: borrowernumber }.to_query
-    url = "#{config[:base_url]}/members/update?#{params}"
+    params = { userid: config[:user], password: config[:password], action: "cardinvalid", borrowernumber: borrowernumber }
+    url = "#{config[:base_url]}/members/update?#{params.to_query}"
     RestClient.get(url)
   end
 
-  def self.update(borrowernumber, cardnumber, userid, expiration_date, pin_number)
+  def self.update(params)
+#    borrowernumber = borrowernumber, cardnumber, userid, expiration_date, pin_number)
     config = get_config
-    params = { userid: config[:user], password: config[:password], action: "update", borrowernumber: borrowernumber, cardnumber: cardnumber, patronuserid: userid, dateexpiry: expiration_date, pin: pin_number}.to_query
-    url = "#{config[:base_url]}/members/update?#{params}"
+    params.merge!({ userid: config[:user], password: config[:password], action: "update"})
+    url = "#{config[:base_url]}/members/update?#{params.to_query}"
     RestClient.get(url)
   end
 end
