@@ -36,7 +36,7 @@ class Card
     begin
       res = Koha.block(basic_data[:borrowernumber]) if basic_data[:borrowernumber]
     rescue => e
-      msg.update_attribute(:response, [__FILE__, __method__, __LINE__, e.message].inspect)
+      msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
     end
     log(res)
   end
@@ -46,7 +46,7 @@ class Card
     begin
       basic_data = Koha.get_basic_data(@pnr)
     rescue => e
-      msg.update_attribute(:response, [__FILE__, __method__, __LINE__, e.message].inspect)
+      msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
     end
     #Does user exist in Koha?
     if basic_data[:borrowernumber]
@@ -63,7 +63,7 @@ class Card
             dateexpiry: @expire,
             pin: @pin})
         rescue => e
-          msg.update_attribute(:response, [__FILE__, __method__, __LINE__, e.message].inspect)
+          msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
         end
       end
     else

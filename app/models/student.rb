@@ -24,7 +24,7 @@ class Student
     begin
       basic_data = Koha.get_basic_data(@pnr)
     rescue => e
-      msg.update_attribute(:response, [__FILE__, __method__, __LINE__, e.message].inspect)
+      msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
     end
     #Does user exist in Koha?
     if basic_data[:borrowernumber]
@@ -43,7 +43,7 @@ class Student
             email: @contact[:email]
           })
         rescue => e
-          msg.update_attribute(:response, [__FILE__, __method__, __LINE__, e.message].inspect)
+          msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
         end
       end
     end

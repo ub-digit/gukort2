@@ -28,7 +28,7 @@ class StudentParticipation
     begin
       MQ.generate_cardnumber(@pnr)
     rescue => e
-      msg.update_attribute(:response, [__FILE__, __method__, __LINE__, e.message].inspect)
+      msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
     end
   end
 
@@ -36,7 +36,7 @@ class StudentParticipation
     begin
       basic_data = Koha.get_basic_data(@pnr)
     rescue => e
-      msg.update_attribute(:response, [__FILE__, __method__, __LINE__, e.message].inspect)
+      msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
     end
 
     #Does user exist in Koha?
@@ -70,7 +70,7 @@ class StudentParticipation
         categorycode: categorycode
       })
     rescue => e
-      msg.update_attribute(:response, [__FILE__, __method__, __LINE__, e.message].inspect)
+      msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
     end
     
   end
@@ -108,7 +108,7 @@ class StudentParticipation
         accept_text: "Biblioteksreglerna accepteras"
       })
     rescue => e
-      msg.update_attribute(:response, [__FILE__, __method__, __LINE__, e.message].inspect)
+      msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
     end
   end
   
