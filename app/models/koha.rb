@@ -48,4 +48,11 @@ class Koha
     url = "#{config[:base_url]}/members/update?#{params.to_query}"
     RestClient.get(url)
   end
+
+  def self.create(params)
+    config = get_koha_config
+    params.merge!({ userid: config[:user], password: config[:password]})
+    url = "#{config[:base_url]}/members/create?#{params.to_query}"
+    RestClient.get(url)
+  end
 end

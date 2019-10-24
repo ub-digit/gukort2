@@ -95,7 +95,7 @@ class StudentParticipation
         personalnumber: @pnr,
         branchcode: "44",
         debarments: debarments.join(","),
-        expirationdate: Time.now + TEMPORARY_ACCOUNT_EXPIRATION,
+        dateexpiry: Time.now + TEMPORARY_ACCOUNT_EXPIRATION,
         patronuserid: @person[:extra][:account],
         # TODO: addresses
         firstname: @person[:name][:firstname],
