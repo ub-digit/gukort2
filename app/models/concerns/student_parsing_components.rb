@@ -3,6 +3,27 @@ module StudentParsingComponents
     return true if ["SH","SE","SS","SP","SM","SA","SK","SY"].include?(categorycode)
     return false
   end
+
+  def is_employed?(basic_data, for_time = nil)
+    time = for_time ? for_time : Time.now
+    if basic_data[:expirationdate] && basic_data[:expirationdate] > time
+      return true
+    end
+    false
+  end
+
+  def generate_categorycode(org_data)
+    # TODO: Check the types and formats for faculty and orgunit
+    nil
+  end
+
+  def enough_data_to_create_patron?(person, course)
+    true # TODO: Check!
+  end
+
+  def valid_address?(address1, address2)
+    true # TODO: Check validity
+  end
   
   def get_value_of_type(data, type_key, value_key, instance_type)
     data.each do |item|

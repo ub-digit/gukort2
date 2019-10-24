@@ -1,6 +1,7 @@
 class StudentParticipation
   include StudentParsingComponents
-
+  TEMPORARY_ACCOUNT_EXPIRATION = 2.months
+  
   def initialize(data, msg)
     @raw = data
     @msg = msg
@@ -12,6 +13,103 @@ class StudentParticipation
   end
 
   def process_student_participation
+    if @participation_type == "Admission"
+      process_admission
+    elsif @participation_type == "Registration"
+      process_registration
+    end
+  end
+
+  def process_admission
+    if IssuedState.has_issued_state?(@pnr)
+      return
+    end
+    IssuedState.set_issued_state(@pnr)
+    begin
+      MQ.generate_cardnumber(@pnr)
+    rescue => e
+      msg.update_attribute(:response, [__FILE__, __method__, __LINE__, e.message].inspect)
+    end
+  end
+
+  def process_registration
+    begin
+      basic_data = Koha.get_basic_data(@pnr)
+    rescue => e
+      msg.update_attribute(:response, [__FILE__, __method__, __LINE__, e.message].inspect)
+    end
+
+    #Does user exist in Koha?
+    if basic_data[:borrowernumber]
+      process_reg_update(basic_data)
+    elsif enough_data_to_create_patron?(@person, @course)
+      process_reg_create
+    end
+  end
+
+  def process_reg_update(basic_data)
+    # Person is employed by GU, they should not be updated from a student message
+    if is_employed?(basic_data)
+      return
+    end
+
+    categorycode = basic_data[:categorycode]
+    if categorycode != "SY"
+      categorycode = generate_categorycode(@course[:org_data])
+    end
+    
+    begin
+      Koha.update({
+        borrowernumber: basic_data[:borrowernumber],
+        patronuserid: @person[:extra][:account],
+        # TODO: addresses
+        firstname: @person[:name][:firstname],
+        surname: @person[:name][:surname],
+        phone: @person[:contact][:phone],
+        email: @person[:contact][:email],
+        categorycode: categorycode
+      })
+    rescue => e
+      msg.update_attribute(:response, [__FILE__, __method__, __LINE__, e.message].inspect)
+    end
+    
+  end
+
+  def process_reg_create
+    # May change to lr
+    debarments = ["wr"]
+    if !valid_address?(@person)
+      debarments << "gna"
+    end
+
+    categorycode = generate_categorycode(@course[:org_data])
+    if categorycode.blank?
+      debarments << "gu"
+      categorycode = "EX"
+    end
+    
+    begin
+      Koha.create({
+        origin: "gukort",
+        cardnumber: @pnr,
+        personalnumber: @pnr,
+        branchcode: "44",
+        debarments: debarments.join(","),
+        expirationdate: Time.now + TEMPORARY_ACCOUNT_EXPIRATION,
+        patronuserid: @person[:extra][:account],
+        # TODO: addresses
+        firstname: @person[:name][:firstname],
+        surname: @person[:name][:surname],
+        phone: @person[:contact][:phone],
+        email: @person[:contact][:email],
+        categorycode: categorycode,
+        lang: "sv-SE",
+        messaging_format: @person[:contact][:email].present? ? "email" : nil,
+        accept_text: "Biblioteksreglerna accepteras"
+      })
+    rescue => e
+      msg.update_attribute(:response, [__FILE__, __method__, __LINE__, e.message].inspect)
+    end
   end
   
   def as_json(opt = {})

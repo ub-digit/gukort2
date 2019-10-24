@@ -19,7 +19,11 @@ class Koha
       end
 
       if (xml.search("//response/expirationdate").text.present?)
-        basic_data.merge!(expirationdate: xml.search("//response/expirationdate").text)
+        expirationstr = xml.search("//response/expirationdate").text
+
+        if expirationstr.present?
+          basic_data.merge!(expirationdate: Time.parse(expirationstr))
+        end
       end
 
       if (xml.search("//response/categorycode").text.present?)
