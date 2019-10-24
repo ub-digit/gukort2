@@ -3,7 +3,7 @@ class Koha
 
   def self.get_basic_data(personalnumber)
     basic_data = { personalnumber: personalnumber }
-    config = get_config
+    config = get_koha_config
     params = { userid: config[:user], password: config[:password], personalnumber: personalnumber }.to_query
     url = "#{config[:base_url]}/members/check?#{params}"
     response = RestClient.get(url)
@@ -31,7 +31,7 @@ class Koha
   end
 
   def self.block(borrowernumber)
-    config = get_config
+    config = get_koha_config
     params = { userid: config[:user], password: config[:password], action: "cardinvalid", borrowernumber: borrowernumber }
     url = "#{config[:base_url]}/members/update?#{params.to_query}"
     RestClient.get(url)
@@ -39,7 +39,7 @@ class Koha
 
   def self.update(params)
 #    borrowernumber = borrowernumber, cardnumber, userid, expiration_date, pin_number)
-    config = get_config
+    config = get_koha_config
     params.merge!({ userid: config[:user], password: config[:password], action: "update"})
     url = "#{config[:base_url]}/members/update?#{params.to_query}"
     RestClient.get(url)

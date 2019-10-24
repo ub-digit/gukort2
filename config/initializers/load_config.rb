@@ -5,7 +5,7 @@ else
 end
 APP_CONFIG = secret_config
 
-def get_config
+def get_koha_config
   {
     base_url: APP_CONFIG["koha"]["base_url"],
     user: APP_CONFIG["koha"]["user"],
@@ -13,5 +13,12 @@ def get_config
     svc_check: APP_CONFIG["koha"]["svc_check"],
     svc_create: APP_CONFIG["koha"]["svc_create"],
     svc_update: APP_CONFIG["koha"]["svc_update"],
+  }
+end
+
+def get_mq_config
+  {
+    rest_url: APP_CONFIG["mq"]["rest_url"],
+    rest_api_key: APP_CONFIG["mq"]["rest_api_key"]
   }
 end
