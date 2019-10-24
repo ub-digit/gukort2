@@ -88,6 +88,7 @@ class Student
       address2: @addr2,
       contact: @contact,
       extra: @extra,
+      pnr: @pnr
     }
   end
 
