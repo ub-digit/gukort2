@@ -22,7 +22,7 @@ class Koha
         basic_data.merge!(expirationdate: xml.search("//response/expirationdate").text)
       end
 
-       if (xml.search("//response/categorycode").text.present?)
+      if (xml.search("//response/categorycode").text.present?)
         basic_data.merge!(categorycode: xml.search("//response/categorycode").text)
       end
 
