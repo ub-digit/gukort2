@@ -33,13 +33,21 @@ class Card
     log("Block patron")
     basic_data = Koha.get_basic_data(@pnr)
     #Set debarment if user exists in Koha
-    res = Koha.block(basic_data[:borrowernumber]) if basic_data[:borrowernumber]
+    begin
+      res = Koha.block(basic_data[:borrowernumber]) if basic_data[:borrowernumber]
+    rescue => e
+      msg.update_attribute(:response, [__FILE__, __method__, __LINE__, e.message].inspect)
+    end
     log(res)
   end
 
   def handle_active
     log("handle active")
-    basic_data = Koha.get_basic_data(@pnr)
+    begin
+      basic_data = Koha.get_basic_data(@pnr)
+    rescue => e
+      msg.update_attribute(:response, [__FILE__, __method__, __LINE__, e.message].inspect)
+    end
     #Does user exist in Koha?
     if basic_data[:borrowernumber]
       log("User exists in Koha")
@@ -47,12 +55,16 @@ class Card
       state_record = IssuedState.where(pnr: @pnr).first
       if state_record
         state_record.update(expiration_date: Date.parse(@expire))
-        Koha.update({
-          borrowernumber: basic_data[:borrowernumber],
-          cardnumber: @cardnumber,
-          patronuserid: @userid,
-          dateexpiry: @expire,
-          pin: @pin})
+        begin
+          Koha.update({
+            borrowernumber: basic_data[:borrowernumber],
+            cardnumber: @cardnumber,
+            patronuserid: @userid,
+            dateexpiry: @expire,
+            pin: @pin})
+        rescue => e
+          msg.update_attribute(:response, [__FILE__, __method__, __LINE__, e.message].inspect)
+        end
       end
     else
       log("User does NOT exist in Koha")

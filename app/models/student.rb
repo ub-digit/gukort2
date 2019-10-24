@@ -21,22 +21,30 @@ class Student
 
   def handle_student
     log("handle active")
-    basic_data = Koha.get_basic_data(@pnr)
+    begin
+      basic_data = Koha.get_basic_data(@pnr)
+    rescue => e
+      msg.update_attribute(:response, [__FILE__, __method__, __LINE__, e.message].inspect)
+    end
     #Does user exist in Koha?
     if basic_data[:borrowernumber]
       # Is user a student according to Koha
       if is_student?(basic_data[:categorycode])
         handle_pnr(basic_data)
-        Koha.update({
-          borrowernumber: basic_data[:borrowernumber],
-          patronuserid: @extra[:account],
-          new_pnr: @new_pnr,
-          # TODO: addresses
-          firstname: @name[:firstname],
-          surname: @name[:surname],
-          phone: @contact[:phone],
-          email: @contact[:email]
-        })
+        begin
+          Koha.update({
+            borrowernumber: basic_data[:borrowernumber],
+            patronuserid: @extra[:account],
+            new_pnr: @new_pnr,
+            # TODO: addresses
+            firstname: @name[:firstname],
+            surname: @name[:surname],
+            phone: @contact[:phone],
+            email: @contact[:email]
+          })
+        rescue => e
+          msg.update_attribute(:response, [__FILE__, __method__, __LINE__, e.message].inspect)
+        end
       end
     end
   end
