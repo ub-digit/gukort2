@@ -31,7 +31,12 @@ class Card
 
   def block_patron
     log("Block patron")
-    basic_data = Koha.get_basic_data(@pnr)
+    begin
+      basic_data = Koha.get_basic_data(@pnr)
+    rescue => e
+      msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
+      return
+    end
     #Set debarment if user exists in Koha
     begin
       res = Koha.block(basic_data[:borrowernumber]) if basic_data[:borrowernumber]
@@ -47,6 +52,7 @@ class Card
       basic_data = Koha.get_basic_data(@pnr)
     rescue => e
       msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
+      return
     end
     #Does user exist in Koha?
     if basic_data[:borrowernumber]

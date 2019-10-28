@@ -25,6 +25,7 @@ class Student
       basic_data = Koha.get_basic_data(@pnr)
     rescue => e
       msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
+      return
     end
     #Does user exist in Koha?
     if basic_data[:borrowernumber]

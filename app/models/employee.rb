@@ -15,6 +15,7 @@ class Employee
       basic_data = Koha.get_basic_data(@pnr)
     rescue => e
       msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
+      return
     end
     if basic_data[:borrowernumber]
       process_update(basic_data)

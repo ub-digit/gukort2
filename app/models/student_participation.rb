@@ -24,9 +24,9 @@ class StudentParticipation
     if IssuedState.has_issued_state?(@pnr)
       return
     end
-    IssuedState.set_issued_state(@pnr)
     begin
       MQ.generate_cardnumber(@pnr)
+      IssuedState.set_issued_state(@pnr)
     rescue => e
       msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
     end
@@ -37,6 +37,7 @@ class StudentParticipation
       basic_data = Koha.get_basic_data(@pnr)
     rescue => e
       msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
+      return
     end
 
     #Does user exist in Koha?
