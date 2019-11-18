@@ -5,8 +5,11 @@ class Koha
     basic_data = { personalnumber: personalnumber }
     config = get_koha_config
     params = { userid: config[:user], password: config[:password], personalnumber: personalnumber }.to_query
+    Rails.logger.debug ["KOHA-CHECK", params]
     url = "#{config[:base_url]}/members/check?#{params}"
+    Rails.logger.debug ["KOHA-CHECK", url]
     response = RestClient.get(url)
+    #return basic_data
 
     if (response && response.code == 200)
       xml = Nokogiri::XML(response.body).remove_namespaces!
@@ -37,6 +40,7 @@ class Koha
   def self.block(borrowernumber)
     config = get_koha_config
     params = { userid: config[:user], password: config[:password], action: "cardinvalid", borrowernumber: borrowernumber }
+    Rails.logger.debug ["KOHA-BLOCK", params]
     url = "#{config[:base_url]}/members/update?#{params.to_query}"
     RestClient.get(url)
   end
@@ -45,6 +49,7 @@ class Koha
 #    borrowernumber = borrowernumber, cardnumber, userid, expiration_date, pin_number)
     config = get_koha_config
     params.merge!({ userid: config[:user], password: config[:password], action: "update"})
+    Rails.logger.debug ["KOHA-UPDATE", params]
     url = "#{config[:base_url]}/members/update?#{params.to_query}"
     RestClient.get(url)
   end
@@ -52,6 +57,7 @@ class Koha
   def self.create(params)
     config = get_koha_config
     params.merge!({ userid: config[:user], password: config[:password]})
+    Rails.logger.debug ["KOHA-CREATE", params]
     url = "#{config[:base_url]}/members/create?#{params.to_query}"
     RestClient.get(url)
   end

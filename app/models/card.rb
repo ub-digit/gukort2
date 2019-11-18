@@ -24,7 +24,7 @@ class Card
       handle_active()
     when "Locked"
       blacklist_card()
-      delete_from_issued_state()
+      IssuedState.delete_issued_state(@pnr)
       block_patron()
     end
   end
@@ -34,14 +34,14 @@ class Card
     begin
       basic_data = Koha.get_basic_data(@pnr)
     rescue => e
-      msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
+      @msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
       return
     end
     #Set debarment if user exists in Koha
     begin
       res = Koha.block(basic_data[:borrowernumber]) if basic_data[:borrowernumber]
     rescue => e
-      msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
+      @msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
     end
     log(res)
   end
@@ -51,26 +51,23 @@ class Card
     begin
       basic_data = Koha.get_basic_data(@pnr)
     rescue => e
-      msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
+      @msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
       return
     end
     #Does user exist in Koha?
     if basic_data[:borrowernumber]
       log("User exists in Koha")
       #uppdatera giltighetsdatatum i gukort2-log
-      state_record = IssuedState.where(pnr: @pnr).first
-      if state_record
-        state_record.update(expiration_date: Date.parse(@expire))
-        begin
-          Koha.update({
-            borrowernumber: basic_data[:borrowernumber],
-            cardnumber: @cardnumber,
-            patronuserid: @userid,
-            dateexpiry: @expire,
-            pin: @pin})
-        rescue => e
-          msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
-        end
+      begin
+        Koha.update({
+          borrowernumber: basic_data[:borrowernumber],
+          cardnumber: @cardnumber,
+          patronuserid: @userid,
+          dateexpiry: @expire,
+          pin: @pin})
+        IssuedState.set_issued_state(pnr, Date.parse(@expire))
+      rescue => e
+        @msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
       end
     else
       log("User does NOT exist in Koha")
@@ -88,14 +85,6 @@ class Card
     log('check blacklisted')
     #return true if no such record exists
     !BlacklistedCardNumber.where(card_number: @cardnumber).empty?
-  end
-
-  def delete_from_issued_state
-    log('delete user')
-    IssuedState.where(pnr: @pnr).first.destroy
-  end
-
-  def add_to_issued_state
   end
 
   def parse(data)

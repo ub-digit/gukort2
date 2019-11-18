@@ -4,7 +4,7 @@ class Student
   include StudentParsingComponents
   include FormatTransformation
 
-  attr_reader :extra
+  attr_reader :extra,:addr1,:addr2
 
   def initialize(data, msg)
     @raw = data
@@ -13,6 +13,7 @@ class Student
       raise StandardError, "Student message does not contain key: personRecord"
     end
     parse(data["personRecord"]["person"])
+    Rails.logger.debug self.extra
   end
 
   def process_student
@@ -24,7 +25,7 @@ class Student
     begin
       basic_data = Koha.get_basic_data(@pnr)
     rescue => e
-      msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
+      @msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
       return
     end
     #Does user exist in Koha?
@@ -44,7 +45,7 @@ class Student
             email: @contact[:email]
           })
         rescue => e
-          msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
+          @msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
         end
       end
     end

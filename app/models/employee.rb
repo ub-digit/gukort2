@@ -14,7 +14,7 @@ class Employee
     begin
       basic_data = Koha.get_basic_data(@pnr)
     rescue => e
-      msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
+      @msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
       return
     end
     if basic_data[:borrowernumber]
@@ -43,18 +43,18 @@ class Employee
         surname: @name[:surname]
       })
     rescue => e
-      msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
+      @msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
     end
 
   end
 
   def process_create
     if !IssuedState.has_issued_state?(@pnr)
-      IssuedState.set_issued_state(@pnr)
       begin
         MQ.generate_cardnumber(@pnr)
+        IssuedState.set_issued_state(@pnr)
       rescue => e
-        msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
+        @msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
       end
     end
 
@@ -81,7 +81,7 @@ class Employee
         accept_text: "Biblioteksreglerna accepteras"
       })
     rescue => e
-      msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
+      @msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
     end
   end
   

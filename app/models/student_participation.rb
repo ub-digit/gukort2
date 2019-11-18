@@ -28,7 +28,7 @@ class StudentParticipation
       MQ.generate_cardnumber(@pnr)
       IssuedState.set_issued_state(@pnr)
     rescue => e
-      msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
+      @msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
     end
   end
 
@@ -36,7 +36,7 @@ class StudentParticipation
     begin
       basic_data = Koha.get_basic_data(@pnr)
     rescue => e
-      msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
+      @msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
       return
     end
 
@@ -55,23 +55,23 @@ class StudentParticipation
     end
 
     categorycode = basic_data[:categorycode]
-    if categorycode != "SY"
-      categorycode = generate_categorycode(@course[:org_data])
+    if categorycode != "SY" && (categorycode[0..0] != "S" || categorycode == "S")
+      categorycode = generate_categorycode(@course[:org_data]) || "S"
     end
     
     begin
       Koha.update({
         borrowernumber: basic_data[:borrowernumber],
-        patronuserid: @person[:extra][:account],
+        patronuserid: @person_hash[:extra][:account],
         # TODO: addresses
-        firstname: @person[:name][:firstname],
-        surname: @person[:name][:surname],
-        phone: @person[:contact][:phone],
-        email: @person[:contact][:email],
+        firstname: @person_hash[:name][:firstname],
+        surname: @person_hash[:name][:surname],
+        phone: @person_hash[:contact][:phone],
+        email: @person_hash[:contact][:email],
         categorycode: categorycode
       })
     rescue => e
-      msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
+      @msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
     end
     
   end
@@ -79,14 +79,14 @@ class StudentParticipation
   def process_reg_create
     # May change to lr
     debarments = ["wr"]
-    if !valid_address?(@person)
+    if !valid_address?(@person.addr1, @person.addr2)
       debarments << "gna"
     end
 
     categorycode = generate_categorycode(@course[:org_data])
     if categorycode.blank?
-      debarments << "gu"
-      categorycode = "EX"
+      # debarments << "gu"  # No need to block, when the message comes from ladok
+      categorycode = "S" # Generic Student
     end
     
     begin
@@ -97,19 +97,21 @@ class StudentParticipation
         branchcode: "44",
         debarments: debarments.join(","),
         dateexpiry: Time.now + TEMPORARY_ACCOUNT_EXPIRATION,
-        patronuserid: @person[:extra][:account],
+        patronuserid: @person_hash[:extra][:account],
         # TODO: addresses
-        firstname: @person[:name][:firstname],
-        surname: @person[:name][:surname],
-        phone: @person[:contact][:phone],
-        email: @person[:contact][:email],
+        firstname: @person_hash[:name][:firstname],
+        surname: @person_hash[:name][:surname],
+        phone: @person_hash[:contact][:phone],
+        email: @person_hash[:contact][:email],
         categorycode: categorycode,
         lang: "sv-SE",
-        messaging_format: @person[:contact][:email].present? ? "email" : nil,
+        messaging_format: @person_hash[:contact][:email].present? ? "email" : nil,
         accept_text: "Biblioteksreglerna accepteras"
       })
+    rescue NoMethodError
+      raise
     rescue => e
-      msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
+      @msg.append_response([__FILE__, __method__, __LINE__, e.inspect].inspect)
     end
   end
   
@@ -122,19 +124,33 @@ class StudentParticipation
 
   def parse(data)
     # Person data identical syntactically to Student message
-    @person = Student.new(data)
+    @person = Student.new(data, @msg)
     @person_hash = @person.as_json()
     @pnr = @person_hash[:pnr]
     @participation_type = data["type"]
-    @course = parse_course(data["WithinCoursePackages"]["WithinCoursePackage"]["courseSectionRecordSet"]["courseSectionRecord"]["courseSection"])
+    if @participation_type == "Registration"
+      @course = parse_course(data["WithinCoursePackages"]["WithinCoursePackage"])
+      Rails.logger.debug @course
+    end
   end
 
-  def parse_course(data)
+  def parse_course(course_data)
+    if course_data.kind_of?(Array)
+      course_data = course_data.first
+    end
+    Rails.logger.debug course_data["courseSectionRecordSet"].class
+    course_data_record = course_data["courseSectionRecordSet"]["courseSectionRecord"]
+    if course_data_record.kind_of?(Array)
+      course_data_record = course_data_record.first
+    end
+    data = course_data_record["courseSection"]
+    template_data = course_data["courseTemplateRecord"]
     main = parse_course_main(data)
+    Rails.logger.debug data.keys
+    
     extra = parse_extension(data["extension"])
 
-    org_data = parse_org_data(data["WithinCoursePackages"]["WithinCoursePackage"]["courseTemplateRecord"],
-                              extra[:course_package_code])
+    org_data = parse_org_data(template_data, extra[:course_package_code])
     
     {
       main: main,
@@ -144,7 +160,7 @@ class StudentParticipation
   end
 
   def parse_org_data(data, package_code)
-    if !data.is_kind_of?(Array)
+    if !data.kind_of?(Array)
       data = [data]
     end
 

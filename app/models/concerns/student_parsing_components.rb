@@ -1,6 +1,6 @@
 module StudentParsingComponents
   def is_student?(categorycode)
-    return true if ["SH","SE","SS","SP","SM","SA","SK","SY"].include?(categorycode)
+    return true if ["SH","SE","SS","SP","SM","SA","SK","SY","S"].include?(categorycode)
     return false
   end
 
