@@ -17,15 +17,71 @@ module StudentParsingComponents
     nil
   end
 
+  def generate_addresses(address1, address2)
+    if has_address?(address2) && !has_address?(address1)
+      address1 = address2
+      address2 = nil
+    end
+
+    address_data = {}
+    
+    if has_address?(address1)
+      address_data.merge!({
+        address: [address1[:care_of], address1[:street]].compact.join(" "),
+        zipcode: address1[:zip],
+        city: address1[:city],
+        country: address1[:country]
+      })
+    end
+
+    if has_address?(address2)
+      address_data.merge!({
+        b_address: [address2[:care_of], address2[:street]].compact.join(" "),
+        b_zipcode: address2[:zip],
+        b_city: address2[:city],
+        b_country: address2[:country]
+      })
+    end
+
+    address_data
+  end
+  
   def enough_data_to_create_patron?(person, course)
     true # TODO: Check!
   end
 
-  def valid_address?(address1, address2)
-    true # TODO: Check validity
+  def has_address?(address)
+    if address && address[:street] && address[:zip] && address[:city]
+      return true
+    else
+      return false
+    end
+  end
+
+  def local_zip?(address)
+    if address &&
+        address[:zip] &&
+        address[:zip].size == 5 &&
+        address[:zip][0] == "4" &&
+        address[:zip] != "40530"
+      return true
+    else
+      return false
+    end
+  end
+
+  def valid_address?(folkbokforing, postadress)
+    # Invalid if no address exists
+    return false if !has_address?(folkbokforing) && !has_address?(postadress)
+    # Invalid if only temporary address outside of GBG area
+    return false if !has_address?(folkbokforing) && has_address?(postadress) && !local_zip?(postadress)
+    true
   end
   
   def get_value_of_type(data, type_key, value_key, instance_type)
+    if !data.is_a?(Array)
+      data = [data]
+    end
     data.each do |item|
       # Need to put item[type_key] in array to reuse get_instance()
       type_value = get_instance([item[type_key]], instance_type)

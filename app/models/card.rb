@@ -64,6 +64,7 @@ class Card
           cardnumber: @cardnumber,
           patronuserid: @userid,
           dateexpiry: @expire,
+          msgtype: "card",
           pin: @pin})
         IssuedState.set_issued_state(pnr, Date.parse(@expire))
       rescue => e

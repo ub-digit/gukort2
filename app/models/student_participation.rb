@@ -79,7 +79,7 @@ class StudentParticipation
   def process_reg_create
     # May change to lr
     debarments = ["wr"]
-    if !valid_address?(@person.addr1, @person.addr2)
+    if !valid_address?(@person.addr2, @person.addr1)
       debarments << "gna"
     end
 
@@ -88,26 +88,29 @@ class StudentParticipation
       # debarments << "gu"  # No need to block, when the message comes from ladok
       categorycode = "S" # Generic Student
     end
+
+    address_fields = generate_addresses(@person.addr2, @person.addr1)
+    params_create = {
+      origin: "gukort",
+      cardnumber: @pnr,
+      personalnumber: @pnr,
+      branchcode: "44",
+      debarments: debarments.join(","),
+      dateexpiry: Time.now + TEMPORARY_ACCOUNT_EXPIRATION,
+      patronuserid: @person_hash[:extra][:account],
+      firstname: @person_hash[:name][:firstname],
+      surname: @person_hash[:name][:surname],
+      phone: @person_hash[:contact][:phone],
+      email: @person_hash[:contact][:email],
+      categorycode: categorycode,
+      lang: "sv-SE",
+      messaging_format: @person_hash[:contact][:email].present? ? "email" : nil,
+      accept_text: "Biblioteksreglerna accepteras"
+    }
+    params_create.merge!(address_fields)
     
     begin
-      Koha.create({
-        origin: "gukort",
-        cardnumber: @pnr,
-        personalnumber: @pnr,
-        branchcode: "44",
-        debarments: debarments.join(","),
-        dateexpiry: Time.now + TEMPORARY_ACCOUNT_EXPIRATION,
-        patronuserid: @person_hash[:extra][:account],
-        # TODO: addresses
-        firstname: @person_hash[:name][:firstname],
-        surname: @person_hash[:name][:surname],
-        phone: @person_hash[:contact][:phone],
-        email: @person_hash[:contact][:email],
-        categorycode: categorycode,
-        lang: "sv-SE",
-        messaging_format: @person_hash[:contact][:email].present? ? "email" : nil,
-        accept_text: "Biblioteksreglerna accepteras"
-      })
+      Koha.create(params_create)
     rescue NoMethodError
       raise
     rescue => e
@@ -129,8 +132,15 @@ class StudentParticipation
     @pnr = @person_hash[:pnr]
     @participation_type = data["type"]
     if @participation_type == "Registration"
-      @course = parse_course(data["WithinCoursePackages"]["WithinCoursePackage"])
-      Rails.logger.debug @course
+      if data["WithinCoursePackages"]
+        @course = parse_course(data["WithinCoursePackages"]["WithinCoursePackage"])
+      else
+        @course = {
+          main: {},
+          extra: {},
+          org_data: {}
+        }
+      end
     end
   end
 
