@@ -63,6 +63,7 @@ class StudentParticipation
       Koha.update({
         borrowernumber: basic_data[:borrowernumber],
         patronuserid: @person_hash[:extra][:account],
+        msgtype: "student_participation",
         # TODO: addresses
         firstname: @person_hash[:name][:firstname],
         surname: @person_hash[:name][:surname],
