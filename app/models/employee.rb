@@ -33,19 +33,6 @@ class Employee
       categorycode = "GU"
     end
 
-    # If parsed last_employment_date is later than current,
-    # update with new date. Nil if date parsing fails.
-    last_employment_date = nil
-    begin
-      last_employment_date_time = Time.parse(@extra[:last_employment_date])
-      if !basic_data[:expirationdate]
-        last_employment_date = @extra[:last_employment_date]
-      elsif last_employment_date_time > basic_data[:expirationdate]
-        last_employment_date = @extra[:last_employment_date]
-      end
-    rescue
-    end
-    
     begin
       Koha.update({
         borrowernumber: basic_data[:borrowernumber],
@@ -54,7 +41,7 @@ class Employee
         new_pnr: @new_pnr,
         firstname: @name[:firstname],
         surname: @name[:surname],
-        last_employment_date: last_employment_date
+        last_employment_date: @extra[:last_employment_date]
       })
     rescue => e
       @msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
