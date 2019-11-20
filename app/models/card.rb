@@ -39,7 +39,9 @@ class Card
     end
     #Set debarment if user exists in Koha
     begin
-      res = Koha.block(basic_data[:borrowernumber]) if basic_data[:borrowernumber]
+      if basic_data[:borrowernumber]
+        res = Koha.block(basic_data[:borrowernumber])
+      end
     rescue => e
       @msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
     end
@@ -72,6 +74,7 @@ class Card
       end
     else
       log("User does NOT exist in Koha")
+      @msg.append_response("User does not exist in Koha")
       # Det finns ingen sådan användare i Koha, uppdatera error log med eventuella fel
       
     end
