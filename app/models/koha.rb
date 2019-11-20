@@ -25,7 +25,11 @@ class Koha
         expirationstr = xml.search("//response/expirationdate").text
 
         if expirationstr.present?
-          basic_data.merge!(expirationdate: Time.parse(expirationstr))
+          # Do not crash with invalid data
+          begin
+            basic_data.merge!(expirationdate: Time.parse(expirationstr))
+          rescue
+          end
         end
       end
 
