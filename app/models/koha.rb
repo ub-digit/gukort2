@@ -6,7 +6,7 @@ class Koha
     config = get_koha_config
     params = { userid: config[:user], password: config[:password], personalnumber: personalnumber }.to_query
     Rails.logger.debug ["KOHA-CHECK", params]
-    url = "#{config[:base_url]}/members/check?#{params}"
+    url = "#{config[:base_url]}#{config[:svc_check]}?#{params}"
     Rails.logger.debug ["KOHA-CHECK", url]
     response = RestClient.get(url)
     #return basic_data
@@ -45,7 +45,7 @@ class Koha
     config = get_koha_config
     params = { userid: config[:user], password: config[:password], action: "cardinvalid", borrowernumber: borrowernumber }
     Rails.logger.debug ["KOHA-BLOCK", params]
-    url = "#{config[:base_url]}/members/update?#{params.to_query}"
+    url = "#{config[:base_url]}#{config[:svc_update]}?#{params.to_query}"
     RestClient.get(url)
   end
 
@@ -54,7 +54,7 @@ class Koha
     config = get_koha_config
     params.merge!({ userid: config[:user], password: config[:password], action: "update"})
     Rails.logger.debug ["KOHA-UPDATE", params]
-    url = "#{config[:base_url]}/members/update?#{params.to_query}"
+    url = "#{config[:base_url]}#{config[:svc_update]}?#{params.to_query}"
     RestClient.get(url)
   end
 
@@ -62,7 +62,7 @@ class Koha
     config = get_koha_config
     params.merge!({ userid: config[:user], password: config[:password]})
     Rails.logger.debug ["KOHA-CREATE", params]
-    url = "#{config[:base_url]}/members/create?#{params.to_query}"
+    url = "#{config[:base_url]}#{config[:svc_create]}?#{params.to_query}"
     RestClient.get(url)
   end
 end
