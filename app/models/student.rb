@@ -21,7 +21,6 @@ class Student
   end
 
   def handle_student
-    log("handle active")
     begin
       basic_data = Koha.get_basic_data(@pnr)
     rescue => e
