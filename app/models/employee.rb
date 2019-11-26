@@ -14,7 +14,7 @@ class Employee
     begin
       basic_data = Koha.get_basic_data(@pnr)
     rescue => e
-      msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
+      @msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
       return
     end
     if basic_data[:borrowernumber]
@@ -40,21 +40,22 @@ class Employee
         categorycode: categorycode,
         new_pnr: @new_pnr,
         firstname: @name[:firstname],
-        surname: @name[:surname]
+        surname: @name[:surname],
+        last_employment_date: @extra[:last_employment_date]
       })
     rescue => e
-      msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
+      @msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
     end
 
   end
 
   def process_create
     if !IssuedState.has_issued_state?(@pnr)
-      IssuedState.set_issued_state(@pnr)
       begin
         MQ.generate_cardnumber(@pnr)
+        IssuedState.set_issued_state(@pnr)
       rescue => e
-        msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
+        @msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
       end
     end
 
@@ -78,10 +79,11 @@ class Employee
         categorycode: "GU",
         lang: "sv-SE",
         messaging_format: @contact[:email].present? ? "email" : nil,
-        accept_text: "Biblioteksreglerna accepteras"
+        accept_text: "Biblioteksreglerna accepteras",
+        last_employment_date: @extra[:last_employment_date]
       })
     rescue => e
-      msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
+      @msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
     end
   end
   
@@ -135,6 +137,11 @@ class Employee
     institution_name = deep_get(data, ["anstallning", "institution", "organisationsnamn"])
     institution_number = deep_get(data, ["anstallning", "institution", "organisationsnummer"])
     last_employment_date = deep_get(data, ["anstallning", "tomDatumSistaAnstallningsperiod", "data"])
+
+    # Add fake date for continous employment
+    if !last_employment_date
+      last_employment_date = "2099-12-31"
+    end
     {
       pnr: pnr,
       new_pnr: new_pnr,
