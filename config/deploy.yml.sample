@@ -1,0 +1,17 @@
+production:
+  host: host1.example.com
+  port: 22
+  user: username
+  path: '/path/to/application/on/server'
+
+staging:
+  host: host2.example.com
+  port: 22
+  user: username
+  path: '/path/to/application/on/server'
+
+lab:
+  host: host3.example.com
+  port: 22
+  user: username
+  path: '/path/to/application/on/server'
