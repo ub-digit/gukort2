@@ -129,6 +129,9 @@ class Student
   end
 
   def parse_contact(contactdata)
+    if contactdata.blank?
+      return {}
+    end
     phone = get_contact(contactdata, "TelephonePrimary")
     email = get_contact(contactdata, "EmailPrimary")
     {
@@ -138,6 +141,9 @@ class Student
   end
 
   def parse_address(addressdata, addr_type)
+    if addressdata.blank?
+      return {}
+    end
     care_of = get_address(addressdata, addr_type, "CareOf")
     street = get_address(addressdata, addr_type, "NonfieldedStreetAddress1")
     zip = get_address(addressdata, addr_type, "Postcode")
