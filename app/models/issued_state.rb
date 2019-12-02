@@ -20,7 +20,7 @@ class IssuedState < ApplicationRecord
     if !expiration_date
       expiration_date = Time.now + UNKNOWN_EXPIRATION_DELAY
     end
-    previous_state = IssuedState.where(pnr: pnr)
+    previous_state = IssuedState.where(pnr: pnr).first
     if previous_state
       previous_state.update(expiration_date: expiration_date)
     else
