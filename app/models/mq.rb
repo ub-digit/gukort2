@@ -2,7 +2,7 @@ class MQ
   def self.generate_cardnumber(pnr)
     config = get_mq_config
 
-    params = { api_key: config["rest_api_key"] }
+    params = { api_key: config[:rest_api_key] }
     url = "#{config[:rest_url]}/cardnumber/#{pnr}?#{params.to_query}"
     RestClient.get(url)
   end
