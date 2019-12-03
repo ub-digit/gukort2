@@ -20,12 +20,20 @@ class Card
 
     case @status
     when "Active"
-      log("handle active in case")
-      handle_active()
+      if @cardnumber.blank?
+        @msg.append_response("Message has no cardnumber")
+      else
+        log("handle active in case")
+        handle_active()
+      end
     when "Locked"
-      blacklist_card()
-      IssuedState.delete_issued_state(@pnr)
-      block_patron()
+      if @cardnumber.blank?
+        @msg.append_response("Message has no cardnumber")
+      else
+        blacklist_card()
+        IssuedState.delete_issued_state(@pnr)
+        block_patron()
+      end
     end
   end
 
