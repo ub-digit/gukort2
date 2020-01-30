@@ -50,10 +50,17 @@ class Employee
   end
 
   def process_create
-    if !IssuedState.has_issued_state?(@pnr)
+    # If PNR was not changed, but we have more than one PNR,
+    # make sure we use the correct one when creating a new user
+    pnr = @pnr
+    if !@extra[:pnr_changed] && @new_pnr
+      pnr = @new_pnr
+    end
+    
+    if !IssuedState.has_issued_state?(pnr)
       begin
-        MQ.generate_cardnumber(@pnr)
-        IssuedState.set_issued_state(@pnr)
+        MQ.generate_cardnumber(pnr)
+        IssuedState.set_issued_state(pnr)
       rescue => e
         @msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
       end
@@ -62,12 +69,12 @@ class Employee
     # Always set WR, and employee data lacks address information, so GNA is
     # set as well.
     debarments = ["wr", "gna"]
-    
+
     begin
       Koha.create({
         origin: "gukort",
-        cardnumber: @pnr,
-        personalnumber: @pnr,
+        cardnumber: pnr,
+        personalnumber: pnr,
         branchcode: "44",
         debarments: debarments.join(","),
         dateexpiry: Time.now + TEMPORARY_ACCOUNT_EXPIRATION,
@@ -126,7 +133,13 @@ class Employee
   def parse_extra(data)
     pnr = deep_get(data, ["personnummer", "data"])
     old_pnr = deep_get(data, ["personnummer", "previousData"])
-    if old_pnr
+    pnr_changed = deep_get(data, ["personnummer", "changed"])
+    if pnr_changed == "true"
+      pnr_changed == true
+    else
+      pnr_changed = false
+    end
+    if old_pnr && pnr_changed
       new_pnr = pnr
       pnr = old_pnr
     end
@@ -145,6 +158,7 @@ class Employee
     {
       pnr: pnr,
       new_pnr: new_pnr,
+      pnr_changed: pnr_changed,
       account: account,
       account_status: account_status,
       faculty_name: faculty_name,
