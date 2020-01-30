@@ -37,6 +37,14 @@ class Card
     end
   end
 
+  # Do not update for certain category codes
+  def should_update?(categorycode)
+    if ["EX", "UX", "FX", "FR", "SR"].include?(categorycode)
+      return false
+    end
+    return true
+  end
+  
   def block_patron
     log("Block patron")
     begin
@@ -45,7 +53,13 @@ class Card
       @msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
       return
     end
-    #Set debarment if user exists in Koha
+    #Set debarment if user exists in Koha and has a suitable category
+
+    # Abort if category is unsuitable
+    if !should_update?(basic_data[:categorycode])
+      return
+    end
+
     begin
       if basic_data[:borrowernumber]
         res = Koha.block(basic_data[:borrowernumber])
@@ -64,8 +78,12 @@ class Card
       @msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
       return
     end
-    #Does user exist in Koha?
+    #Does user exist in Koha and is of a suitable category?
     if basic_data[:borrowernumber]
+      # Abort if category is unsuitable for update
+      if !should_update?(basic_data[:categorycode])
+        return
+      end
       log("User exists in Koha")
       #uppdatera giltighetsdatatum i gukort2-log
       begin
