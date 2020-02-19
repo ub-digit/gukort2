@@ -101,6 +101,13 @@ class Student
     @extra = parse_extension(data["extension"])
     # For consistency with other queue data parsers
     @pnr = @extra[:pnr]
+
+    # Force email to be <gusid>@student.gu.se. This may change in
+    # the future, so it is a bit of a hack for the moment.
+    gusid = @extra[:account]
+    if gusid.present?
+      @contact[:email] = "#{gusid}@student.gu.se"
+    end
   end
 
   def parse_extension(extensiondata)
