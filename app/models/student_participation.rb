@@ -55,7 +55,7 @@ class StudentParticipation
     end
 
     categorycode = basic_data[:categorycode]
-    if categorycode != "SY" && (categorycode[0..0] != "S" || categorycode == "S")
+    if categorycode != "SY" && (categorycode[0..0] != "S" || categorycode == "S" || categorycode == "SR")
       categorycode = generate_categorycode(@course[:org_data]) || "S"
     end
     
