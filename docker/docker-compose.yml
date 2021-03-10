@@ -1,0 +1,48 @@
+version: '3.4'
+
+services:
+
+  api:
+    image: ${IMAGE_API} 
+#   build: ../                # Only for development
+    restart: always
+    environment:
+      - RAILS_ENV=${RAILS_ENV}
+      - RAILS_LOG_TO_STDOUT=${RAILS_LOG_TO_STDOUT} # Not used in development
+      - SECRET_KEY_BASE=${RAILS_SECRET_KEY_BASE}   # Not used in development
+      - KOHA_BASE_URL=${KOHA_BASE_URL}
+      - KOHA_USER=${KOHA_USER}
+      - KOHA_PASS=${KOHA_PASS}
+      - KOHA_SVC_CHECK=${KOHA_SVC_CHECK}
+      - KOHA_SVC_CREATE=${KOHA_SVC_CREATE}
+      - KOHA_SVC_UPDATE=${KOHA_SVC_UPDATE}
+      - MQ_REST_URL=${MQ_REST_URL}
+      - MQ_REST_API_KEY=${MQ_REST_API_KEY}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+    ports:
+      - "${EXPOSED_PORT_API}:${RAILS_PORT}"
+    volumes:                  # Only for development
+      - ../:/usr/src/app      # Only for development
+    depends_on:
+      - db
+ 
+  db:
+    image: ${IMAGE_DB}
+    restart: always
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASS}
+    ports:
+      - "${EXPOSED_PORT_DB}:${DB_PORT}"
+    volumes:
+      - ${PWD:-.}/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+      - dbdata:/var/lib/postgresql/data # Change dbdata to ${DB_DIR} when not for development
+
+volumes:                      # Only for development
+  dbdata:                     # Only for development
+
