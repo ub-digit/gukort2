@@ -11,6 +11,13 @@ class Employee
   end
 
   def process_employee
+    # If personStatus is DELETE we ignore this message since we
+    # do not delete patrons from Koha.
+    if @extra[:person_status] == "DELETE"
+      @msg.append_response([__FILE__, __method__, __LINE__, "DELETE message ignored"].inspect)
+      return
+    end
+
     begin
       basic_data = Koha.get_basic_data(@pnr)
     rescue => e
@@ -143,6 +150,7 @@ class Employee
       new_pnr = pnr
       pnr = old_pnr
     end
+    person_status = deep_get(data, ["personStatus"])
     account = deep_get(data, ["gukonto", "konto"])
     account_status = deep_get(data, ["gukonto", "status"])
     faculty_name = deep_get(data, ["anstallning", "fakultet", "organisationsnamn"])
@@ -159,6 +167,7 @@ class Employee
       pnr: pnr,
       new_pnr: new_pnr,
       pnr_changed: pnr_changed,
+      person_status: person_status,
       account: account,
       account_status: account_status,
       faculty_name: faculty_name,
