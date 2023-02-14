@@ -28,11 +28,11 @@ gem 'puma', '~> 3.7'
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
-  gem 'capistrano',  '~> 3.4.0'
-  gem 'capistrano-rails', '~> 1.1'
-  gem 'capistrano-passenger'
-  gem 'capistrano-bundler', '~> 1.1.2'
-  gem 'capistrano-rvm'
+  # gem 'capistrano',  '~> 3.4.0'
+  # gem 'capistrano-rails', '~> 1.1'
+  # gem 'capistrano-passenger'
+  # gem 'capistrano-bundler', '~> 1.1.2'
+  # gem 'capistrano-rvm'
 end
 
 group :development do
@@ -43,7 +43,7 @@ group :development do
 end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
-gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
+# gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
 
 # XML parameters may only be used with the actionpack-xml_parser gem
 gem 'actionpack-xml_parser'

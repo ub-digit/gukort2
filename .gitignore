@@ -16,8 +16,6 @@
 
 .byebug_history
 
-config/database.yml
-config/config_secret.yml
 config/deploy.yml
 
 .vscode/*
@@ -25,3 +23,14 @@ config/deploy.yml
 *~
 .#*
 \#*#
+
+# On GitHub all docker related files will be in the docker directory except
+# for the content of the docker-entrypoint-initdb.d directory and the .env
+# file, which are not included in the repo.
+Dockerfile
+entrypoint.sh
+.dockerignore
+!/docker/api/*
+docker/.env
+docker/docker-entrypoint-initdb.d/*
+!/docker/docker-entrypoint-initdb.d/.keep

@@ -17,6 +17,8 @@ class StudentParticipation
       process_admission
     elsif @participation_type == "Registration"
       process_registration
+    elsif @participation_type == "Reregistration"
+      process_registration
     end
   end
 
