@@ -27,17 +27,18 @@ class User
   def process_update(basic_data)
     categorycode = basic_data[:categorycode]
 
-    # TODO: Handle categorycode change
-    #
-    #
-    # If Working for UB (PE) or already categorised as researcher (F*),
-    # do not replace category code, otherwise set GU as generic employee
-    if categorycode != "PE" && categorycode[0..0] != "F"
-      categorycode = "GU"
+    if @extra[:user_type] == "Student" && !has_employee_categorycode?(categorycode)
+      if categorycode == "SR" || categorycode[0..0] != "S"
+        categorycode = "S"
+      end
+    else
+      if (categorycode != "PE" && categorycode[0..0] != "F") || categorycode == "FR" || categorycode == "FX"
+        categorycode = "GU"
+      end
     end
 
     begin
-      Koha.update({
+      Koha.handle_syncuser({
         borrowernumber: basic_data[:borrowernumber],
         patronuserid: @extra[:account],
         patronstatus: @extra[:account_status],
@@ -59,20 +60,10 @@ class User
   end
 
   def process_create
-    # TODO: Handle cardnumber part
-    #
-    #
-    # if !IssuedState.has_issued_state?(pnr)
-    #   begin
-    #     MQ.generate_cardnumber(pnr)
-    #     IssuedState.set_issued_state(pnr)
-    #   rescue => e
-    #     @msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
-    #   end
-    # end
-
-    # Always set WR, and user data lacks address information, so GNA is
-    # set as well.
+    if @extra[:account_status] == "inactive"
+      @msg.append_response([__FILE__, __method__, __LINE__, "Inactive user should never be created"].inspect)
+      return
+    end
     debarments = ["wr", "gna"]
 
     categorycode = "GU"
@@ -81,10 +72,10 @@ class User
     end
 
     begin
-      Koha.create({
+      Koha.handle_syncuser({
         origin: "gukort",
-        cardnumber: pnr,
-        personalnumber: pnr,
+        cardnumber: @pnr,
+        personalnumber: @pnr,
         branchcode: "44",
         debarments: debarments.join(","),
         dateexpiry: Time.now + TEMPORARY_ACCOUNT_EXPIRATION,
@@ -136,7 +127,7 @@ class User
   end
 
   def parse_contact(data)
-    emails = data["emails"].select(|e| e["primary"])
+    emails = data["emails"].select {|e| e["primary"]}
     if(emails.empty?)
       return {}
     end
@@ -150,6 +141,11 @@ class User
     person_status = deep_get(data, ["active"])
     account = deep_get(data, ["userName"])
     account_status = deep_get(data, ["active"])
+    if(account_status == true)
+      account_status = "active"
+    else
+      account_status = "inactive"
+    end
 
     # Doc/Staff only
     department_name = deep_get(data, ["urn:in:params:scim:schemas:extension:edu:2.0:User", "departmentName"])
@@ -189,4 +185,16 @@ class User
     end
     d
   end
+
+  def has_employee_categorycode?(categorycode)
+    return true if categorycode == "PE"
+    return true if categorycode == "GU"
+    return true if categorycode == "TJ"
+    return true if categorycode == "TN"
+    return false if categorycode == "FR"
+    return false if categorycode == "FX"
+    return true if categorycode[0..0] == "F"
+    return false
+  end
+
 end  

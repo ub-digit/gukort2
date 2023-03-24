@@ -34,3 +34,4 @@ entrypoint.sh
 docker/.env
 docker/docker-entrypoint-initdb.d/*
 !/docker/docker-entrypoint-initdb.d/.keep
+.env.local

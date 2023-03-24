@@ -16,6 +16,7 @@ def get_koha_config
     svc_check: APP_CONFIG["koha"]["svc_check"],
     svc_create: APP_CONFIG["koha"]["svc_create"],
     svc_update: APP_CONFIG["koha"]["svc_update"],
+    svc_syncuser: APP_CONFIG["koha"]["svc_syncuser"],
   }
 end
 

@@ -58,6 +58,14 @@ class Koha
     RestClient.get(url)
   end
 
+  def self.handle_syncuser(params)
+    config = get_koha_config
+    params.merge!({ userid: config[:user], password: config[:password], action: "handle-syncuser"})
+    Rails.logger.debug ["KOHA-HANDLE-SYNCUSER", params, config]
+    url = "#{config[:base_url]}#{config[:svc_syncuser]}?#{params.to_query}"
+    RestClient.get(url)
+  end
+
   def self.create(params)
     config = get_koha_config
     params.merge!({ userid: config[:user], password: config[:password]})
