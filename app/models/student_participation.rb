@@ -134,7 +134,7 @@ class StudentParticipation
     @person_hash = @person.as_json()
     @pnr = @person_hash[:pnr]
     @participation_type = data["type"]
-    if @participation_type == "Registration"
+    if @participation_type == "Registration" || @participation_type == "Reregistration"
       if data["WithinCoursePackages"]
         @course = parse_course(data["WithinCoursePackages"]["WithinCoursePackage"])
       else
