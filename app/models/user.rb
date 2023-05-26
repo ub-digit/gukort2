@@ -26,6 +26,10 @@ class User
 
   def process_update(basic_data)
     categorycode = basic_data[:categorycode]
+    if @extra[:user_type].blank?
+      @msg.append_response([__FILE__, __method__, __LINE__, "User type must be present. Ignored."].inspect)
+      return
+    end
 
     if @extra[:user_type] == "Student" && !has_employee_categorycode?(categorycode)
       if categorycode == "SR" || categorycode[0..0] != "S"
