@@ -4,4 +4,5 @@ Rails.application.routes.draw do
   resources :employee_messages
   resources :student_messages
   resources :student_participation_messages
+  resources :user_messages
 end
