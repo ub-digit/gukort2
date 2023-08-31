@@ -32,17 +32,24 @@ class Student
       # Is user a student according to Koha
       if is_student?(basic_data[:categorycode])
         handle_pnr(basic_data)
+
+        address_fields = generate_addresses(@addr2, @addr1)
+        if !valid_address?(@addr2, @addr1)
+          address_fields = {}
+        end
+        params = {
+          borrowernumber: basic_data[:borrowernumber],
+          patronuserid: @extra[:account],
+          new_pnr: @new_pnr,
+          firstname: @name[:firstname],
+          surname: @name[:surname],
+          phone: @contact[:phone],
+          email: @contact[:email]
+        }
+        params.merge!(address_fields)
+    
         begin
-          Koha.update({
-            borrowernumber: basic_data[:borrowernumber],
-            patronuserid: @extra[:account],
-            new_pnr: @new_pnr,
-            # TODO: addresses
-            firstname: @name[:firstname],
-            surname: @name[:surname],
-            phone: @contact[:phone],
-            email: @contact[:email]
-          })
+          Koha.update(params)
         rescue => e
           @msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
         end
