@@ -1,4 +1,4 @@
-FROM       ruby:2.5.3
+FROM       ruby:2.5.8
 
 # The location of the forskarskap app in the image
 ENV        APP_HOME=/usr/src/app/
