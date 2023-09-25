@@ -60,19 +60,25 @@ class StudentParticipation
     if categorycode != "SY" && (categorycode[0..0] != "S" || categorycode == "S" || categorycode == "SR")
       categorycode = generate_categorycode(@course[:org_data]) || "S"
     end
-    
+
+    address_fields = generate_addresses(@person.addr2, @person.addr1)
+    if !valid_address?(@person.addr2, @person.addr1)
+      address_fields = {}
+    end
+    params = {
+      borrowernumber: basic_data[:borrowernumber],
+      patronuserid: @person_hash[:extra][:account],
+      msgtype: "student_participation",
+      firstname: @person_hash[:name][:firstname],
+      surname: @person_hash[:name][:surname],
+      phone: @person_hash[:contact][:phone],
+      email: @person_hash[:contact][:email],
+      categorycode: categorycode
+    }
+    params.merge!(address_fields)
+
     begin
-      Koha.update({
-        borrowernumber: basic_data[:borrowernumber],
-        patronuserid: @person_hash[:extra][:account],
-        msgtype: "student_participation",
-        # TODO: addresses
-        firstname: @person_hash[:name][:firstname],
-        surname: @person_hash[:name][:surname],
-        phone: @person_hash[:contact][:phone],
-        email: @person_hash[:contact][:email],
-        categorycode: categorycode
-      })
+      Koha.update(params)
     rescue => e
       @msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
     end

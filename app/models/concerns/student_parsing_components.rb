@@ -73,8 +73,8 @@ module StudentParsingComponents
   def valid_address?(folkbokforing, postadress)
     # Invalid if no address exists
     return false if !has_address?(folkbokforing) && !has_address?(postadress)
-    # Invalid if only temporary address outside of GBG area
-    return false if !has_address?(folkbokforing) && has_address?(postadress) && !local_zip?(postadress)
+    # # Invalid if only temporary address outside of GBG area
+    # return false if !has_address?(folkbokforing) && has_address?(postadress) && !local_zip?(postadress)
     true
   end
   
