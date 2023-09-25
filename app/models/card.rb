@@ -26,6 +26,9 @@ class Card
         log("handle active in case")
         handle_active()
       end
+    when "Inactive"
+      log("handle inactive in case (PIN update)")
+      handle_inactive()
     when "Locked"
       if @cardnumber.blank?
         @msg.append_response("Message has no cardnumber")
@@ -95,6 +98,38 @@ class Card
           msgtype: "card",
           pin: @pin})
         IssuedState.set_issued_state(pnr, Date.parse(@expire))
+      rescue => e
+        @msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
+      end
+    else
+      log("User does NOT exist in Koha")
+      @msg.append_response("User does not exist in Koha")
+      # Det finns ingen sådan användare i Koha, uppdatera error log med eventuella fel
+      
+    end
+  end
+
+  def handle_inactive
+    log("handle inactive")
+    begin
+      basic_data = Koha.get_basic_data(@pnr)
+    rescue => e
+      @msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
+      return
+    end
+    #Does user exist in Koha and is of a suitable category?
+    if basic_data[:borrowernumber]
+      # Abort if category is unsuitable for update
+      if !should_update?(basic_data[:categorycode])
+        return
+      end
+      log("User exists in Koha")
+      #uppdatera giltighetsdatatum i gukort2-log
+      begin
+        Koha.updatepin({
+          borrowernumber: basic_data[:borrowernumber],
+          msgtype: "updatepin",
+          pin: @pin})
       rescue => e
         @msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
       end
