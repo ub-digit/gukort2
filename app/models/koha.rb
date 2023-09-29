@@ -58,6 +58,15 @@ class Koha
     RestClient.get(url)
   end
 
+  # Same as update, but only updates PIN
+  def self.updatepin(params)
+    config = get_koha_config
+    params.merge!({ userid: config[:user], password: config[:password], action: "updatepin"})
+    Rails.logger.debug ["KOHA-UPDATEPIN", params]
+    url = "#{config[:base_url]}#{config[:svc_update]}?#{params.to_query}"
+    RestClient.get(url)
+  end
+
   def self.handle_syncuser(params)
     config = get_koha_config
     params.merge!({ userid: config[:user], password: config[:password], action: "handle-syncuser"})
