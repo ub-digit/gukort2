@@ -111,6 +111,10 @@ class Card
 
   def handle_inactive
     log("handle inactive")
+    # There is no need to handle inactive cards. We have changed the PIN update policy 
+    # to only function on active cards. So we return early here.
+    return
+
     begin
       basic_data = Koha.get_basic_data(@pnr)
     rescue => e
