@@ -111,9 +111,8 @@ class Card
 
   def handle_inactive
     log("handle inactive")
-    # There is no need to handle inactive cards. We have changed the PIN update policy 
-    # to only function on active cards. So we return early here.
-    return
+    # Check environment variable to see if we should update PIN for inactive cards
+    return if !should_update_inactive
 
     begin
       basic_data = Koha.get_basic_data(@pnr)
@@ -182,5 +181,13 @@ class Card
     }
   end
 
-  
+  def should_update_inactive
+    # We should accept any version of:
+    # true, t, yes, y, 1 in any capitalization
+    # Everything else is false
+    # ENV does not have to be set
+    return false if ENV['UPDATE_INACTIVE_CARDS'].nil?
+    return true if [true, "true", "t", "yes", "y", "1"].include?(ENV['UPDATE_INACTIVE_CARDS'].downcase)
+    return false
+  end
 end
