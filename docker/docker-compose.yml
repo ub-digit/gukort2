@@ -23,6 +23,7 @@ services:
       - DB_NAME=${DB_NAME}
       - DB_USER=${DB_USER}
       - DB_PASS=${DB_PASS}
+      - UPDATE_INACTIVE_CARDS=${UPDATE_INACTIVE_CARDS}
     ports:
       - "${EXPOSED_PORT_API}:${RAILS_PORT}"
     volumes:                  # Only for development
