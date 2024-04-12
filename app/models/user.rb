@@ -12,7 +12,7 @@ class User
 
   def process_user
     begin
-      basic_data = Koha.get_basic_data(@pnr)
+      basic_data = Koha.get_basic_data(@pnr, @extra[:account])
     rescue => e
       @msg.append_response([__FILE__, __method__, __LINE__, e.message].inspect)
       return

@@ -1,10 +1,10 @@
 class Koha
 # All communication with Koha is gathered here
 
-  def self.get_basic_data(personalnumber)
+  def self.get_basic_data(personalnumber, userid = nil)
     basic_data = { personalnumber: personalnumber }
     config = get_koha_config
-    params = { userid: config[:user], password: config[:password], personalnumber: personalnumber }.to_query
+    params = { userid: config[:user], password: config[:password], personalnumber: personalnumber, patronuserid: userid }.to_query
     Rails.logger.debug ["KOHA-CHECK", params]
     url = "#{config[:base_url]}#{config[:svc_check]}?#{params}"
     Rails.logger.debug ["KOHA-CHECK", url]
