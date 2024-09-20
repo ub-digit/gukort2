@@ -74,8 +74,11 @@ class EmployeePop
     end
 
     # Always set WR, and employee data lacks address information, so GNA is
-    # set as well.
-    debarments = ["wr", "gna"]
+    # set as well. If ADDRESS_MANDATORY is set to true.
+    debarments = ["wr"]
+    if ENV["ADDRESS_MANDATORY"] == "true"
+      debarments << "gna"
+    end
 
     begin
       Koha.create({

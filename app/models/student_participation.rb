@@ -88,7 +88,7 @@ class StudentParticipation
   def process_reg_create
     # May change to lr
     debarments = ["wr"]
-    if !valid_address?(@person.addr2, @person.addr1)
+    if ENV["ADDRESS_MANDATORY"] == "true" && !valid_address?(@person.addr2, @person.addr1)
       debarments << "gna"
     end
 
