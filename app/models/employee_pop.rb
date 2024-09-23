@@ -142,7 +142,7 @@ class EmployeePop
   end
 
   def get_account_data(data)
-    list_of_credentials = deep_get(data, "securityCredentials")
+    list_of_credentials = deep_get_array(data, ["securityCredentials"])
     # Find one where the id.schemeId is "User-GUKonto". That's the one we want.
     # If we don't find it, or if there is no "id", we just return an empty hash.
     credential = list_of_credentials.find { |c| c["id"] && c["id"]["schemeId"] == "User-GUKonto" } || {}
@@ -171,7 +171,7 @@ class EmployeePop
     most_recent_affiliation = get_most_recent_affiliation(data)
 
     # First look for email
-    list_of_emails = deep_get(most_recent_affiliation, ["guExtension", "communication", "email"]) || []
+    list_of_emails = deep_get_array(most_recent_affiliation, ["guExtension", "communication", "email"]) || []
     email = list_of_emails.find { |e| e["useCode"] == "Personal" }
     if !email
       email = list_of_emails.first
@@ -183,7 +183,7 @@ class EmployeePop
     end
     
     # Then look for phone
-    list_of_phones = deep_get(most_recent_affiliation, ["guExtension", "communication", "phone"]) || []
+    list_of_phones = deep_get_array(most_recent_affiliation, ["guExtension", "communication", "phone"]) || []
     phone = list_of_phones.find { |p| p["useCode"] == "Mobile" }
     if !phone
       phone = list_of_phones.find { |p| p["useCode"] == "Work" }
@@ -203,7 +203,7 @@ class EmployeePop
   end
 
   def get_most_recent_affiliation(data)
-    list_of_affiliations = deep_get(data, ["affiliations"])
+    list_of_affiliations = deep_get_array(data, ["affiliations"])
     # Now we need to find the most recent affiliation.
     # Each affiliation can have an "endDate" which we can use to compare.
     # The "endDate" may be missing, in which case we assume it is still active.
@@ -216,7 +216,7 @@ class EmployeePop
         affiliation["endDate"] = "9999-12-31"
       end
     end
-    list_of_affiliations.sort_by { |a| a["endDate"] }.first || {}
+    list_of_affiliations.sort_by { |a| a["endDate"] }.last || {}
   end
 
   def get_last_employment_date(data)
@@ -287,6 +287,20 @@ class EmployeePop
     end
     if d.kind_of?(Array)
       return d.first
+    end
+    d
+  end
+
+  # Same as deep_get, but returns an array instead of the first element if the type is an array, otherwise the object itself.
+  def deep_get_array(data, path)
+    d = data
+    path.each do |p|
+      return nil if !d[p]
+      if d[p].kind_of?(Array)
+        d = d[p]
+      else
+        d = d[p]
+      end
     end
     d
   end
