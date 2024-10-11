@@ -68,7 +68,10 @@ class User
       @msg.append_response([__FILE__, __method__, __LINE__, "Inactive user should never be created"].inspect)
       return
     end
-    debarments = ["wr", "gna"]
+    debarments = ["wr"]
+    if ENV["ADDRESS_MANDATORY"] == "true"
+      debarments << "gna"
+    end
 
     categorycode = "GU"
     if @extra[:user_type] == "Student"
