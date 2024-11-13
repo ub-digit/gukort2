@@ -42,7 +42,7 @@ class Card
 
   # Do not update for certain category codes
   def should_update?(categorycode)
-    if ["EX", "UX", "FX", "FR", "SR"].include?(categorycode)
+    if ["EX", "EM", "UX", "FX", "FR", "SR"].include?(categorycode)
       return false
     end
     return true
