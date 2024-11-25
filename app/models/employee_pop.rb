@@ -13,7 +13,7 @@ class EmployeePop
   def process_employee
     # If personStatus is DELETE we ignore this message since we
     # do not delete patrons from Koha.
-    if @extra[:person_status] == "inactive"
+    if @extra[:person_status] == "expired"
       @msg.append_response([__FILE__, __method__, __LINE__, "inactive message ignored"].inspect)
       return
     end
