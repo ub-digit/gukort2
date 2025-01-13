@@ -147,7 +147,7 @@ class EmployeePop
     # If we don't find it, or if there is no "id", we just return an empty hash.
     credential = list_of_credentials.find { |c| c["id"] && c["id"]["schemeId"] == "User-GUKonto" } || {}
     account = deep_get(credential, ["id", "value"])
-    account_status = deep_get(data, ["status"])
+    account_status = deep_get(credential, ["status"])
     {
       account: account,
       account_status: account_status
