@@ -4,7 +4,7 @@ class Koha
   def self.get_basic_data(personalnumber, userid = nil)
     basic_data = { personalnumber: personalnumber }
     config = get_koha_config
-    params = { userid: config[:user], password: config[:password], personalnumber: personalnumber, patronuserid: userid }.to_query
+    params = { login_userid: config[:user], login_password: config[:password], personalnumber: personalnumber, patronuserid: userid }.to_query
     Rails.logger.debug ["KOHA-CHECK", params]
     url = "#{config[:base_url]}#{config[:svc_check]}?#{params}"
     Rails.logger.debug ["KOHA-CHECK", url]
@@ -43,7 +43,7 @@ class Koha
 
   def self.block(borrowernumber)
     config = get_koha_config
-    params = { userid: config[:user], password: config[:password], action: "cardinvalid", borrowernumber: borrowernumber }
+    params = { login_userid: config[:user], login_password: config[:password], action: "cardinvalid", borrowernumber: borrowernumber }
     Rails.logger.debug ["KOHA-BLOCK", params]
     url = "#{config[:base_url]}#{config[:svc_update]}?#{params.to_query}"
     RestClient.get(url)
@@ -52,7 +52,7 @@ class Koha
   def self.update(params)
 #    borrowernumber = borrowernumber, cardnumber, userid, expiration_date, pin_number)
     config = get_koha_config
-    params.merge!({ userid: config[:user], password: config[:password], action: "update"})
+    params.merge!({ login_userid: config[:user], login_password: config[:password], action: "update"})
     Rails.logger.debug ["KOHA-UPDATE", params]
     url = "#{config[:base_url]}#{config[:svc_update]}?#{params.to_query}"
     RestClient.get(url)
@@ -61,7 +61,7 @@ class Koha
   # Same as update, but only updates PIN
   def self.updatepin(params)
     config = get_koha_config
-    params.merge!({ userid: config[:user], password: config[:password], action: "updatepin"})
+    params.merge!({ login_userid: config[:user], login_password: config[:password], action: "updatepin"})
     Rails.logger.debug ["KOHA-UPDATEPIN", params]
     url = "#{config[:base_url]}#{config[:svc_update]}?#{params.to_query}"
     RestClient.get(url)
@@ -69,7 +69,7 @@ class Koha
 
   def self.handle_syncuser(params)
     config = get_koha_config
-    params.merge!({ userid: config[:user], password: config[:password], action: "handle-syncuser"})
+    params.merge!({ login_userid: config[:user], login_password: config[:password], action: "handle-syncuser"})
     Rails.logger.debug ["KOHA-HANDLE-SYNCUSER", params, config]
     url = "#{config[:base_url]}#{config[:svc_syncuser]}?#{params.to_query}"
     RestClient.get(url)
@@ -77,7 +77,7 @@ class Koha
 
   def self.create(params)
     config = get_koha_config
-    params.merge!({ userid: config[:user], password: config[:password]})
+    params.merge!({ login_userid: config[:user], login_password: config[:password]})
     Rails.logger.debug ["KOHA-CREATE", params]
     url = "#{config[:base_url]}#{config[:svc_create]}?#{params.to_query}"
     RestClient.get(url)
