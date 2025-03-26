@@ -46,6 +46,9 @@ class Student
           phone: @contact[:phone],
           email: @contact[:email]
         }
+        if @contact[:b_email]
+          params[:b_email] = @contact[:b_email]
+        end
         params.merge!(address_fields)
     
         begin
@@ -112,6 +115,10 @@ class Student
     # Force email to be <gusid>@student.gu.se. This may change in
     # the future, so it is a bit of a hack for the moment.
     gusid = @extra[:account]
+    # Before this, if there is a @contact[:email], set it to @contact[:b_email]
+    if @contact[:email].present?
+      @contact[:b_email] = @contact[:email]
+    end
     if gusid.present?
       @contact[:email] = "#{gusid}@student.gu.se"
     end

@@ -75,6 +75,9 @@ class StudentParticipation
       email: @person_hash[:contact][:email],
       categorycode: categorycode
     }
+    if @person_hash[:contact][:b_email]
+      params[:b_email] = @person_hash[:contact][:b_email]
+    end
     params.merge!(address_fields)
 
     begin
@@ -116,6 +119,9 @@ class StudentParticipation
       messaging_format: @person_hash[:contact][:email].present? ? "email" : nil,
       accept_text: "Biblioteksreglerna accepteras"
     }
+    if @person_hash[:contact][:b_email]
+      params_create[:b_email] = @person_hash[:contact][:b_email]
+    end
     params_create.merge!(address_fields)
     
     begin
