@@ -161,6 +161,10 @@ class User
     institution_name = deep_get(data, ["urn:in:params:scim:schemas:extension:edu:2.0:User", "institutionName"])
 
     user_type = deep_get(data, ["userType"])
+    # Check if user_type (downcase) contains "student", then set user_type to "Student"
+    if user_type && user_type.downcase.include?("student")
+      user_type = "Student"
+    end
     # Student only
     valid_to = deep_get(data, ["urn:in:params:scim:schemas:extension:edu:2.0:User", "validTo"])
 
