@@ -68,6 +68,10 @@ class User
       @msg.append_response([__FILE__, __method__, __LINE__, "Inactive user should never be created"].inspect)
       return
     end
+    if @extra[:user_type].blank?
+      @msg.append_response([__FILE__, __method__, __LINE__, "User type must be present. Ignored."].inspect)
+      return
+    end
     debarments = ["wr"]
     if ENV["ADDRESS_MANDATORY"] == "true"
       debarments << "gna"
