@@ -13,7 +13,10 @@ class EmployeePop
   def process_employee
     # If personStatus is DELETE we ignore this message since we
     # do not delete patrons from Koha.
-    if @extra[:person_status] == "expired"
+    # person status is derived from a combination of guExtension.active, account presence and account status.
+    # It is "active" if all three conditions are met, otherwise "inactive".
+    # The previous "expired" status is now replaced with "inactive", derived from "account_status" not being "active"
+    if @extra[:person_status] == "inactive"
       @msg.append_response([__FILE__, __method__, __LINE__, "inactive message ignored"].inspect)
       return
     end
@@ -229,6 +232,19 @@ class EmployeePop
     most_recent_affiliation["endDate"]
   end
 
+  def get_gu_status(data)
+    gu_extension = deep_get(data, ["guExtension"])
+    if !gu_extension
+      return nil
+    end
+    gu_status = gu_extension["active"]
+    if gu_status == true
+      return "active"
+    else
+      return "inactive"
+    end
+  end
+
   def parse_extra(data)
     # This could be both a Legal-Samordningsnummer or a Legal-Personnummer
     # For the moment we just use the value regardless of type
@@ -239,9 +255,20 @@ class EmployeePop
     new_pnr = pnr
     account_data = get_account_data(data)
     # "active"/"inactive"
-    person_status = account_data[:account_status]
+
     account = account_data[:account]
     account_status = account_data[:account_status]
+
+    # Person status is derived from the combination of three things to be considered "active", all others will result in "inactive":
+    # 1. guExtension.active is true
+    # 2. There is an account (account is not nil or empty)
+    # 3. The account status is "active"
+    if get_gu_status(data) == "active" && account.present? && account_status == "active"
+      person_status = "active"
+    else
+      person_status = "inactive"
+    end
+
     # faculty_name = deep_get(data, ["anstallning", "fakultet", "organisationsnamn"])
     # faculty_number = deep_get(data, ["anstallning", "fakultet", "organisationsnummer"])
     # institution_name = deep_get(data, ["anstallning", "institution", "organisationsnamn"])
