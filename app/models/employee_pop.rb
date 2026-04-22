@@ -49,6 +49,7 @@ class EmployeePop
         patronuserid: @extra[:account],
         categorycode: categorycode,
         new_pnr: @new_pnr,
+        msgtype: "employee_pop",
         firstname: @name[:firstname],
         surname: @name[:surname],
         last_employment_date: @extra[:last_employment_date]
@@ -95,6 +96,7 @@ class EmployeePop
         surname: @name[:surname],
         phone: @contact[:phone],
         email: @contact[:email],
+        msgtype: "employee_pop",
         categorycode: "GU",
         lang: "sv-SE",
         messaging_format: @contact[:email].present? ? "email" : nil,
