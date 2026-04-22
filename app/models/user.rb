@@ -72,7 +72,7 @@ class User
       @msg.append_response([__FILE__, __method__, __LINE__, "User type must be present. Ignored."].inspect)
       return
     end
-    debarments = ["wr"]
+    debarments = []
     if ENV["ADDRESS_MANDATORY"] == "true"
       debarments << "gna"
     end

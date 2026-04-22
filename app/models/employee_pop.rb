@@ -78,7 +78,7 @@ class EmployeePop
 
     # Always set WR, and employee data lacks address information, so GNA is
     # set as well. If ADDRESS_MANDATORY is set to true.
-    debarments = ["wr"]
+    debarments = []
     if ENV["ADDRESS_MANDATORY"] == "true"
       debarments << "gna"
     end
@@ -90,7 +90,6 @@ class EmployeePop
         personalnumber: pnr,
         branchcode: "44",
         debarments: debarments.join(","),
-        dateexpiry: Time.now + TEMPORARY_ACCOUNT_EXPIRATION,
         patronuserid: @extra[:account],
         firstname: @name[:firstname],
         surname: @name[:surname],
