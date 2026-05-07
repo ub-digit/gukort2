@@ -103,7 +103,6 @@ class StudentParticipation
     address_fields = generate_addresses(@person.addr2, @person.addr1)
     params_create = {
       origin: "gukort",
-      cardnumber: @pnr,
       personalnumber: @pnr,
       branchcode: "44",
       debarments: debarments.join(","),

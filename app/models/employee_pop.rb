@@ -87,7 +87,6 @@ class EmployeePop
     begin
       Koha.create({
         origin: "gukort",
-        cardnumber: pnr,
         personalnumber: pnr,
         branchcode: "44",
         debarments: debarments.join(","),
