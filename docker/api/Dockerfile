@@ -5,7 +5,7 @@ ENV        APP_HOME=/usr/src/app/
 WORKDIR    $APP_HOME
 
 # Copy the Gemfile and Gemfile.lock and install gems
-COPY       ./Gemfile ./
+COPY       ./Gemfile* ./
 RUN        bundle install
 
 # Install locale and some other stuff
@@ -25,9 +25,7 @@ ENV        LANG=en_US.UTF-8
 ENV        LANGUAGE=en_US:en
 
 # Copy the full context
-RUN        mv Gemfile.lock /tmp/Gemfile.lock
 COPY       . ./
-RUN        mv /tmp/Gemfile.lock ./
 
 # Add a script to be executed every time the container starts
 COPY       entrypoint.sh /
