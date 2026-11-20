@@ -49,6 +49,7 @@ class EmployeePop
         patronuserid: @extra[:account],
         categorycode: categorycode,
         new_pnr: @new_pnr,
+        msgtype: "employee_pop",
         firstname: @name[:firstname],
         surname: @name[:surname],
         last_employment_date: @extra[:last_employment_date]
@@ -78,7 +79,7 @@ class EmployeePop
 
     # Always set WR, and employee data lacks address information, so GNA is
     # set as well. If ADDRESS_MANDATORY is set to true.
-    debarments = ["wr"]
+    debarments = []
     if ENV["ADDRESS_MANDATORY"] == "true"
       debarments << "gna"
     end
@@ -86,16 +87,15 @@ class EmployeePop
     begin
       Koha.create({
         origin: "gukort",
-        cardnumber: pnr,
         personalnumber: pnr,
         branchcode: "44",
         debarments: debarments.join(","),
-        dateexpiry: Time.now + TEMPORARY_ACCOUNT_EXPIRATION,
         patronuserid: @extra[:account],
         firstname: @name[:firstname],
         surname: @name[:surname],
         phone: @contact[:phone],
         email: @contact[:email],
+        msgtype: "employee_pop",
         categorycode: "GU",
         lang: "sv-SE",
         messaging_format: @contact[:email].present? ? "email" : nil,

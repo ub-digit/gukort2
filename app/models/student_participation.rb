@@ -89,8 +89,7 @@ class StudentParticipation
   end
 
   def process_reg_create
-    # May change to lr
-    debarments = ["wr"]
+    debarments = []
     if ENV["ADDRESS_MANDATORY"] == "true" && !valid_address?(@person.addr2, @person.addr1)
       debarments << "gna"
     end
@@ -104,11 +103,9 @@ class StudentParticipation
     address_fields = generate_addresses(@person.addr2, @person.addr1)
     params_create = {
       origin: "gukort",
-      cardnumber: @pnr,
       personalnumber: @pnr,
       branchcode: "44",
       debarments: debarments.join(","),
-      dateexpiry: Time.now + TEMPORARY_ACCOUNT_EXPIRATION,
       patronuserid: @person_hash[:extra][:account],
       firstname: @person_hash[:name][:firstname],
       surname: @person_hash[:name][:surname],
